@@ -80,3 +80,18 @@
 [2025-12-25 10:47:34.514] INFO  [orchestrator] ==================================================
 [2025-12-25 10:47:34.576] INFO  [orchestrator] GuardRail Platform Stopped
 [2025-12-25 10:47:34.638] INFO  [orchestrator] ==================================================
+[2025-12-25 13:34:15.891] INFO  [orchestrator] ==================================================
+[2025-12-25 13:34:15.942] INFO  [orchestrator] Starting GuardRail Platform
+[2025-12-25 13:34:15.996] INFO  [orchestrator] ==================================================
+[2025-12-25 13:34:16.047] INFO  [orchestrator] Checking system dependencies...
+[2025-12-25 13:34:16.199] INFO  [orchestrator] [OK] Docker: Docker version 29.1.3, build f52814d
+[2025-12-25 13:34:16.559] INFO  [orchestrator] [OK] Docker Compose: Docker Compose version v2.40.3-desktop.1
+[2025-12-25 13:34:16.646] INFO  [orchestrator] [OK] Rust: rustc 1.91.1 (ed61e7d7e 2025-11-07)
+[2025-12-25 13:34:16.780] INFO  [orchestrator] [OK] Cargo: cargo 1.91.1 (ea2d97820 2025-10-10)
+[2025-12-25 13:34:16.883] INFO  [orchestrator] [OK] Node.js: v24.12.0
+[2025-12-25 13:34:17.922] INFO  [orchestrator] [OK] npm: 11.7.0
+[2025-12-25 13:34:17.974] INFO  [orchestrator] Starting infrastructure (PostgreSQL, Redis)...
+[2025-12-25 13:34:19.026] INFO  [orchestrator] [OK] PostgreSQL already running on port 5432
+[2025-12-25 13:34:19.640] ERROR [orchestrator] Failed to start infrastructure: time="2025-12-25T13:34:19-06:00" level=warning msg="C:\\Users\\tyler\\Downloads\\guardrail-complete\\guardrail\\infrastructure\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+unable to get image 'redis:7-alpine': error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/images/redis:7-alpine/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
+

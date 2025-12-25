@@ -943,6 +943,10 @@ def find_project_root() -> Path:
 def main():
     if len(sys.argv) < 2:
         print_help()
+        # Pause on Windows when double-clicked (no args) so user can read output
+        if sys.platform == "win32":
+            print("\nPress Enter to exit...")
+            input()
         sys.exit(0)
 
     command = sys.argv[1].lower()
