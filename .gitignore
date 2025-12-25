@@ -1,29 +1,9 @@
-# Dependencies
 node_modules/
 target/
 dist/
-build/
-
-# Rust
+__pycache__/
+.env
+.vscode/
+.idea/
 *.pdb
 Cargo.lock
-
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-
-# Environment
-.env
-.env.local
-
-# OS
-.DS_Store
-Thumbs.db
-
