@@ -9,6 +9,14 @@ echo ║       Building GuardRail Orchestrator .exe                     ║
 echo ╚════════════════════════════════════════════════════════════════╝
 echo.
 
+REM Activate virtual environment
+if exist ".venv\Scripts\activate.bat" (
+    call .venv\Scripts\activate.bat
+) else (
+    echo ERROR: Virtual environment not found. Please run 'python -m venv .venv' first.
+    exit /b 1
+)
+
 REM Check for Python
 where python >nul 2>&1
 if %ERRORLEVEL% neq 0 (

@@ -1,4 +1,4 @@
-#!/bin/bash
+sudo cp dist/guardrail-orchestrator /usr/local/bin/#!/bin/bash
 # ============================================================================
 # Build GuardRail Orchestrator to native binary
 # ============================================================================
