@@ -125,3 +125,131 @@ unable to get image 'redis:7-alpine': error during connect: Get "http://%2F%2F.%
 [2025-12-25 13:43:19.807] ERROR [orchestrator] Failed to start infrastructure: time="2025-12-25T13:43:19-06:00" level=warning msg="C:\\Users\\tyler\\Downloads\\guardrail-complete\\guardrail\\infrastructure\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
 unable to get image 'redis:7-alpine': error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/images/redis:7-alpine/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
 
+[2025-12-25 16:08:53.661] INFO  [orchestrator] Starting in daemon mode...
+[2025-12-25 16:08:53.737] INFO  [orchestrator] ==================================================
+[2025-12-25 16:08:53.791] INFO  [orchestrator] Starting GuardRail Platform
+[2025-12-25 16:08:53.845] INFO  [orchestrator] ==================================================
+[2025-12-25 16:08:53.899] INFO  [orchestrator] Checking system dependencies...
+[2025-12-25 16:08:54.008] INFO  [orchestrator] [OK] Docker: Docker version 29.1.3, build f52814d
+[2025-12-25 16:08:54.935] INFO  [orchestrator] [OK] Docker Compose: Docker Compose version v2.40.3-desktop.1
+[2025-12-25 16:08:55.049] INFO  [orchestrator] [OK] Rust: rustc 1.91.1 (ed61e7d7e 2025-11-07)
+[2025-12-25 16:08:55.142] INFO  [orchestrator] [OK] Cargo: cargo 1.91.1 (ea2d97820 2025-10-10)
+[2025-12-25 16:08:56.133] INFO  [orchestrator] [OK] Node.js: v24.12.0
+[2025-12-25 16:08:57.269] INFO  [orchestrator] [OK] npm: 11.7.0
+[2025-12-25 16:08:57.328] INFO  [orchestrator] Starting infrastructure (PostgreSQL, Redis)...
+[2025-12-25 16:08:58.399] INFO  [orchestrator] [OK] PostgreSQL already running on port 5432
+[2025-12-25 16:09:07.359] INFO  [orchestrator] Infrastructure containers started
+[2025-12-25 16:09:07.423] INFO  [orchestrator] Waiting for Redis...
+[2025-12-25 16:09:07.507] INFO  [orchestrator] [OK] Redis is ready
+[2025-12-25 16:09:07.573] INFO  [identity-service] Starting service...
+[2025-12-25 16:09:07.643] INFO  [identity-service] Started with PID 16836
+[2025-12-25 16:09:10.711] INFO  [identity-service] [OK] Service is running
+[2025-12-25 16:09:13.776] INFO  [policy-engine] Starting service...
+[2025-12-25 16:09:13.844] INFO  [policy-engine] Started with PID 9280
+[2025-12-25 16:09:16.907] INFO  [policy-engine] [OK] Service is running
+[2025-12-25 16:09:19.981] INFO  [movement-ledger] Starting service...
+[2025-12-25 16:09:20.052] INFO  [movement-ledger] Started with PID 18568
+[2025-12-25 16:09:23.114] ERROR [movement-ledger] Process exited immediately with code 101
+[2025-12-25 16:09:23.188] ERROR [movement-ledger]   180 |     }
+[2025-12-25 16:09:23.247] ERROR [movement-ledger]   181 | }
+[2025-12-25 16:09:23.305] ERROR [movement-ledger]       | ^ unexpected closing delimiter
+[2025-12-25 16:09:23.367] ERROR [movement-ledger]   
+[2025-12-25 16:09:23.424] ERROR [movement-ledger]   error: could not compile `guardrail-shared` (lib) due to 1 previous error
+[2025-12-25 16:09:23.483] ERROR [orchestrator] Failed to start movement-ledger
+[2025-12-25 16:09:23.543] INFO  [orchestrator] Continuing with remaining services...
+[2025-12-25 16:09:26.604] INFO  [chain-anchor] Starting service...
+[2025-12-25 16:09:26.699] INFO  [chain-anchor] Started with PID 18524
+[2025-12-25 16:09:29.767] INFO  [chain-anchor] [OK] Service is running
+[2025-12-25 16:09:32.832] INFO  [api-gateway] Starting service...
+[2025-12-25 16:09:32.910] INFO  [api-gateway] Started with PID 8336
+[2025-12-25 16:09:36.012] INFO  [api-gateway] [OK] Service is running
+[2025-12-25 16:09:39.238] INFO  [frontend] Starting service...
+[2025-12-25 16:09:39.399] INFO  [frontend] Started with PID 17536
+[2025-12-25 16:09:42.604] INFO  [frontend] [OK] Service is running
+[2025-12-25 16:09:45.822] INFO  [orchestrator] ==================================================
+[2025-12-25 16:09:46.092] INFO  [orchestrator] GuardRail Platform Started (5/6 services)
+[2025-12-25 16:09:46.386] INFO  [orchestrator] 
+[2025-12-25 16:09:46.571] INFO  [orchestrator]   API Gateway:  http://localhost:3000
+[2025-12-25 16:09:46.772] INFO  [orchestrator]   Console:      http://localhost:3010
+[2025-12-25 16:09:46.981] INFO  [orchestrator] ==================================================
+[2025-12-25 16:09:47.253] INFO  [orchestrator] Daemon running. Press Ctrl+C to stop.
+[2025-12-25 16:10:02.049] WARNING [identity-service] Health check failed (1/3)
+[2025-12-25 16:10:06.446] WARNING [policy-engine] Health check failed (1/3)
+[2025-12-25 16:10:10.980] WARNING [chain-anchor] Health check failed (1/3)
+[2025-12-25 16:10:15.150] WARNING [api-gateway] Health check failed (1/3)
+[2025-12-25 16:10:20.239] WARNING [frontend] Health check failed (1/3)
+[2025-12-25 16:10:34.391] WARNING [identity-service] Health check failed (2/3)
+[2025-12-25 16:10:38.536] WARNING [policy-engine] Health check failed (2/3)
+[2025-12-25 16:10:42.703] WARNING [chain-anchor] Health check failed (2/3)
+[2025-12-25 16:10:46.872] WARNING [api-gateway] Health check failed (2/3)
+[2025-12-25 16:11:01.113] WARNING [identity-service] Health check failed (3/3)
+[2025-12-25 16:11:01.192] WARNING [identity-service] Initiating self-heal restart...
+[2025-12-25 16:11:01.273] INFO  [identity-service] Stopping service...
+[2025-12-25 16:11:01.353] INFO  [identity-service] Service stopped
+[2025-12-25 16:11:06.414] INFO  [identity-service] Starting service...
+[2025-12-25 16:11:06.514] INFO  [identity-service] Started with PID 14364
+[2025-12-25 16:11:09.616] ERROR [identity-service] Process exited immediately with code 101
+[2025-12-25 16:11:09.711] ERROR [identity-service]   180 |     }
+[2025-12-25 16:11:09.778] ERROR [identity-service]   181 | }
+[2025-12-25 16:11:09.841] ERROR [identity-service]       | ^ unexpected closing delimiter
+[2025-12-25 16:11:09.901] ERROR [identity-service]   
+[2025-12-25 16:11:09.964] ERROR [identity-service]   error: could not compile `guardrail-shared` (lib) due to 1 previous error
+[2025-12-25 16:11:10.030] ERROR [identity-service] [X] Self-heal restart failed
+[2025-12-25 16:11:14.172] WARNING [policy-engine] Health check failed (3/3)
+[2025-12-25 16:11:14.256] WARNING [policy-engine] Initiating self-heal restart...
+[2025-12-25 16:11:14.314] INFO  [policy-engine] Stopping service...
+[2025-12-25 16:11:14.372] INFO  [policy-engine] Service stopped
+[2025-12-25 16:11:19.434] INFO  [policy-engine] Starting service...
+[2025-12-25 16:11:19.503] INFO  [policy-engine] Started with PID 9308
+[2025-12-25 16:11:22.568] ERROR [policy-engine] Process exited immediately with code 101
+[2025-12-25 16:11:22.661] ERROR [policy-engine]   180 |     }
+[2025-12-25 16:11:22.732] ERROR [policy-engine]   181 | }
+[2025-12-25 16:11:22.804] ERROR [policy-engine]       | ^ unexpected closing delimiter
+[2025-12-25 16:11:22.885] ERROR [policy-engine]   
+[2025-12-25 16:11:22.946] ERROR [policy-engine]   error: could not compile `guardrail-shared` (lib) due to 1 previous error
+[2025-12-25 16:11:23.004] ERROR [policy-engine] [X] Self-heal restart failed
+[2025-12-25 16:11:27.152] WARNING [chain-anchor] Health check failed (3/3)
+[2025-12-25 16:11:27.233] WARNING [chain-anchor] Initiating self-heal restart...
+[2025-12-25 16:11:27.290] INFO  [chain-anchor] Stopping service...
+[2025-12-25 16:11:27.349] INFO  [chain-anchor] Service stopped
+[2025-12-25 16:11:32.406] INFO  [chain-anchor] Starting service...
+[2025-12-25 16:11:32.493] INFO  [chain-anchor] Started with PID 17040
+[2025-12-25 16:11:35.569] INFO  [chain-anchor] [OK] Service is running
+[2025-12-25 16:11:35.697] INFO  [chain-anchor] [OK] Self-heal restart successful
+[2025-12-25 16:11:39.875] WARNING [api-gateway] Health check failed (3/3)
+[2025-12-25 16:11:40.016] WARNING [api-gateway] Initiating self-heal restart...
+[2025-12-25 16:11:40.206] INFO  [api-gateway] Stopping service...
+[2025-12-25 16:11:40.374] INFO  [api-gateway] Service stopped
+[2025-12-25 16:11:45.498] INFO  [api-gateway] Starting service...
+[2025-12-25 16:11:45.574] INFO  [api-gateway] Started with PID 6500
+[2025-12-25 16:11:48.644] ERROR [api-gateway] Process exited immediately with code 101
+[2025-12-25 16:11:48.733] ERROR [api-gateway]   180 |     }
+[2025-12-25 16:11:48.805] ERROR [api-gateway]   181 | }
+[2025-12-25 16:11:48.872] ERROR [api-gateway]       | ^ unexpected closing delimiter
+[2025-12-25 16:11:48.956] ERROR [api-gateway]   
+[2025-12-25 16:11:49.020] ERROR [api-gateway]   error: could not compile `guardrail-shared` (lib) due to 1 previous error
+[2025-12-25 16:11:49.084] ERROR [api-gateway] [X] Self-heal restart failed
+[2025-12-25 16:12:03.288] WARNING [chain-anchor] Health check failed (1/3)
+[2025-12-25 16:12:17.539] WARNING [chain-anchor] Health check failed (2/3)
+[2025-12-25 16:12:31.734] WARNING [chain-anchor] Health check failed (3/3)
+[2025-12-25 16:12:31.809] WARNING [chain-anchor] Initiating self-heal restart...
+[2025-12-25 16:12:31.867] INFO  [chain-anchor] Stopping service...
+[2025-12-25 16:12:31.925] INFO  [chain-anchor] Service stopped
+[2025-12-25 16:12:37.001] INFO  [chain-anchor] Starting service...
+[2025-12-25 16:12:37.554] INFO  [chain-anchor] Started with PID 9488
+[2025-12-25 16:12:40.947] INFO  [chain-anchor] [OK] Service is running
+[2025-12-25 16:12:41.500] INFO  [chain-anchor] [OK] Self-heal restart successful
+[2025-12-25 16:12:56.647] WARNING [chain-anchor] Health check failed (1/3)
+[2025-12-25 16:13:12.555] WARNING [chain-anchor] Health check failed (2/3)
+[2025-12-25 16:13:27.070] WARNING [chain-anchor] Health check failed (3/3)
+[2025-12-25 16:13:27.365] WARNING [chain-anchor] Initiating self-heal restart...
+[2025-12-25 16:13:27.653] INFO  [chain-anchor] Stopping service...
+[2025-12-25 16:13:28.091] INFO  [chain-anchor] Service stopped
+[2025-12-25 16:13:33.376] INFO  [chain-anchor] Starting service...
+[2025-12-25 16:13:33.782] INFO  [chain-anchor] Started with PID 17272
+[2025-12-25 16:13:37.191] INFO  [chain-anchor] [OK] Service is running
+[2025-12-25 16:13:37.728] INFO  [chain-anchor] [OK] Self-heal restart successful
+[2025-12-25 16:13:52.410] WARNING [chain-anchor] Health check failed (1/3)
+[2025-12-25 16:14:07.232] WARNING [chain-anchor] Health check failed (2/3)
+[2025-12-25 16:14:21.455] WARNING [chain-anchor] Health check failed (3/3)
+[2025-12-25 16:14:21.532] ERROR [chain-anchor] Max restart attempts reached

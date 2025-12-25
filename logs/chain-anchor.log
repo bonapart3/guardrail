@@ -17,3 +17,95 @@ all possible versions conflict with previously selected packages.
     ... which satisfies path dependency `guardrail-shared` of package `api-gateway v0.1.0 (C:\Users\tyler\Downloads\guardrail-complete\guardrail\backend\api-gateway)`
 
 failed to select a version for `serde_core` which could resolve this conflict
+   Compiling ring v0.17.14
+   Compiling ring v0.16.20
+   Compiling ethers-contract-abigen v2.0.14
+   Compiling walkdir v2.5.0
+   Compiling tracing-futures v0.2.5
+   Compiling coins-bip32 v0.8.7
+   Compiling toml v0.8.23
+   Compiling Inflector v0.11.4
+   Compiling aes v0.8.4
+   Compiling jsonwebtoken v8.3.0
+   Compiling rustls v0.21.12
+   Compiling ctr v0.9.2
+   Compiling enr v0.10.0
+   Compiling pbkdf2 v0.12.2
+   Compiling uuid v0.8.2
+   Compiling instant v0.1.13
+   Compiling dunce v1.0.5
+   Compiling eth-keystore v0.5.0
+   Compiling coins-bip39 v0.8.7
+   Compiling ethers-signers v2.0.14
+   Compiling futures-locks v0.7.1
+   Compiling sct v0.7.1
+   Compiling rustls-webpki v0.101.7
+   Compiling ethers-addressbook v2.0.14
+   Compiling guardrail-shared v0.1.0 (C:\users\tyler\downloads\guardrail-complete\guardrail\backend\shared)
+error: unexpected closing delimiter: `}`
+   --> shared\src\errors.rs:181:1
+    |
+144 |     pub fn error_code(&self) -> &'static str {
+    |                                              - this delimiter might not be properly closed...
+...
+179 |         }
+    |         - ...as it matches this but it has different indentation
+180 |     }
+181 | }
+    | ^ unexpected closing delimiter
+
+error: could not compile `guardrail-shared` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+   Compiling rustls v0.21.12
+   Compiling ring v0.16.20
+   Compiling ethers-contract-derive v2.0.14
+   Compiling guardrail-shared v0.1.0 (C:\users\tyler\downloads\guardrail-complete\guardrail\backend\shared)
+error: unexpected closing delimiter: `}`
+   --> shared\src\errors.rs:181:1
+    |
+144 |     pub fn error_code(&self) -> &'static str {
+    |                                              - this delimiter might not be properly closed...
+...
+179 |         }
+    |         - ...as it matches this but it has different indentation
+180 |     }
+181 | }
+    | ^ unexpected closing delimiter
+
+error: could not compile `guardrail-shared` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+   Compiling tokio-rustls v0.24.1
+   Compiling tungstenite v0.20.1
+   Compiling jsonwebtoken v8.3.0
+   Compiling guardrail-shared v0.1.0 (C:\users\tyler\downloads\guardrail-complete\guardrail\backend\shared)
+error: unexpected closing delimiter: `}`
+   --> shared\src\errors.rs:181:1
+    |
+144 |     pub fn error_code(&self) -> &'static str {
+    |                                              - this delimiter might not be properly closed...
+...
+179 |         }
+    |         - ...as it matches this but it has different indentation
+180 |     }
+181 | }
+    | ^ unexpected closing delimiter
+
+error: could not compile `guardrail-shared` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+   Compiling hyper-rustls v0.24.2
+   Compiling tokio-tungstenite v0.20.1
+   Compiling guardrail-shared v0.1.0 (C:\users\tyler\downloads\guardrail-complete\guardrail\backend\shared)
+error: unexpected closing delimiter: `}`
+   --> shared\src\errors.rs:181:1
+    |
+144 |     pub fn error_code(&self) -> &'static str {
+    |                                              - this delimiter might not be properly closed...
+...
+179 |         }
+    |         - ...as it matches this but it has different indentation
+180 |     }
+181 | }
+    | ^ unexpected closing delimiter
+
+error: could not compile `guardrail-shared` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
