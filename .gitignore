@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+target/
+dist/
+build/
+
+# Rust
+*.pdb
+Cargo.lock
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+

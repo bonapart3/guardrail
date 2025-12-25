@@ -1,0 +1,37 @@
+[package]
+name = "guardrail-orchestrator"
+version = "1.0.0"
+edition = "2021"
+description = "Dedicated daemon for managing the GuardRail compliance platform"
+license = "MIT"
+
+[[bin]]
+name = "guardrail-orchestrator"
+path = "src/main.rs"
+
+[dependencies]
+# HTTP client for health checks
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+
+# CLI and terminal UI
+colored = "2.1"
+crossterm = "0.27"
+ctrlc = "3.4"
+
+# Configuration
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+
+# Time/Date
+chrono = { version = "0.4", features = ["serde"] }
+
+# Unix signals (for graceful shutdown)
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

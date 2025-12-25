@@ -1,0 +1,207 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/guardrail
+
+jobs:
+  # ==========================================================================
+  # BUILD AND PUSH DOCKER IMAGES
+  # ==========================================================================
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      backend_tag: ${{ steps.meta-backend.outputs.tags }}
+      frontend_tag: ${{ steps.meta-frontend.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Extract metadata (backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-backend
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+      
+      - name: Extract metadata (frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+      
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.API_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==========================================================================
+  # DEPLOY TO RAILWAY (Backend Services)
+  # ==========================================================================
+  deploy-backend-staging:
+    name: Deploy Backend (Staging)
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.event.inputs.environment == 'staging' || github.event.inputs.environment == ''
+    environment: staging
+    steps:
+      - name: Deploy to Railway
+        run: |
+          curl -X POST "${{ secrets.RAILWAY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{"service": "backend", "image": "${{ needs.build-images.outputs.backend_tag }}"}'
+
+  deploy-backend-production:
+    name: Deploy Backend (Production)
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.event.inputs.environment == 'production'
+    environment: production
+    steps:
+      - name: Deploy to Railway
+        run: |
+          curl -X POST "${{ secrets.RAILWAY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{"service": "backend", "image": "${{ needs.build-images.outputs.backend_tag }}"}'
+
+  # ==========================================================================
+  # DEPLOY TO VERCEL (Frontend)
+  # ==========================================================================
+  deploy-frontend-staging:
+    name: Deploy Frontend (Staging)
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.event.inputs.environment == 'staging' || github.event.inputs.environment == ''
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./frontend
+
+  deploy-frontend-production:
+    name: Deploy Frontend (Production)
+    runs-on: ubuntu-latest
+    needs: build-images
+    if: github.event.inputs.environment == 'production'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./frontend
+
+  # ==========================================================================
+  # RUN DATABASE MIGRATIONS
+  # ==========================================================================
+  migrate-staging:
+    name: Run Migrations (Staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-backend-staging]
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Migrations
+        run: |
+          psql "${{ secrets.DATABASE_URL }}" -f scripts/init.sql
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+
+  migrate-production:
+    name: Run Migrations (Production)
+    runs-on: ubuntu-latest
+    needs: [deploy-backend-production]
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Migrations
+        run: |
+          psql "${{ secrets.DATABASE_URL }}" -f scripts/init.sql
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+
+  # ==========================================================================
+  # POST-DEPLOY HEALTH CHECK
+  # ==========================================================================
+  healthcheck:
+    name: Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy-backend-staging, deploy-frontend-staging]
+    if: always() && (needs.deploy-backend-staging.result == 'success' || needs.deploy-backend-production.result == 'success')
+    steps:
+      - name: Wait for services
+        run: sleep 30
+      
+      - name: Check API Health
+        run: |
+          curl --fail --retry 5 --retry-delay 10 \
+            "${{ vars.API_URL }}/health"
+      
+      - name: Check Frontend Health
+        run: |
+          curl --fail --retry 5 --retry-delay 10 \
+            "${{ vars.FRONTEND_URL }}"

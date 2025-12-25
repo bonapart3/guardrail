@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "guardrail-sdk"
+version = "0.1.0"
+description = "GuardRail Python SDK for crypto compliance"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = ["guardrail", "compliance", "crypto", "policy", "audit"]
+authors = [
+    { name = "GuardRail", email = "dev@guardrail.dev" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/guardrail/sdk-python"
+Documentation = "https://docs.guardrail.dev/sdk/python"
+Repository = "https://github.com/guardrail/sdk-python"

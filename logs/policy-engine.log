@@ -1,0 +1,20 @@
+    Blocking waiting for file lock on package cache
+    Updating crates.io index
+error: failed to select a version for `serde_core`.
+    ... required by package `serde v1.0.227`
+    ... which satisfies dependency `serde = "^1.0.144"` of package `sqlx-mysql v0.7.0`
+    ... which satisfies dependency `sqlx-mysql = "=0.7.0"` of package `sqlx v0.7.0`
+    ... which satisfies dependency `sqlx = "^0.7"` of package `guardrail-shared v0.1.0 (C:\Users\tyler\Downloads\guardrail-complete\guardrail\backend\shared)`
+    ... which satisfies path dependency `guardrail-shared` of package `api-gateway v0.1.0 (C:\Users\tyler\Downloads\guardrail-complete\guardrail\backend\api-gateway)`
+versions that meet the requirements `=1.0.227` are: 1.0.227
+
+all possible versions conflict with previously selected packages.
+
+  previously selected package `serde_core v1.0.228`
+    ... which satisfies dependency `serde_core = "^1.0.228"` of package `bitflags v2.10.0`
+    ... which satisfies dependency `bitflags = "^2"` of package `sqlx-mysql v0.7.0`
+    ... which satisfies dependency `sqlx-mysql = "=0.7.0"` of package `sqlx v0.7.0`
+    ... which satisfies dependency `sqlx = "^0.7"` of package `guardrail-shared v0.1.0 (C:\Users\tyler\Downloads\guardrail-complete\guardrail\backend\shared)`
+    ... which satisfies path dependency `guardrail-shared` of package `api-gateway v0.1.0 (C:\Users\tyler\Downloads\guardrail-complete\guardrail\backend\api-gateway)`
+
+failed to select a version for `serde_core` which could resolve this conflict
