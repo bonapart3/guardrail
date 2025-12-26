@@ -63,10 +63,8 @@ impl PolicyEngine {
 
     /// Evaluate an action against loaded policies
     pub fn evaluate(&mut self, input: &serde_json::Value) -> Result<PolicyEvalResult> {
-        // Set the input for evaluation
-        self.engine
-            .set_input(input.clone())
-            .map_err(|e| GuardRailError::PolicyEvaluation(format!("Failed to set input: {}", e)))?;
+        // Set the input for evaluation - convert serde_json::Value to regorus::Value
+        self.engine.set_input(input.clone().into());
 
         // Query for the decision
         // Default policy structure expects: data.guardrail.decision
@@ -89,9 +87,10 @@ impl PolicyEngine {
         let mut required_approvers: Vec<String> = Vec::new();
 
         for result in results.result.iter() {
-            if let Some(bindings) = result.bindings.as_ref() {
+            // Get bindings as object if possible
+            if let Some(obj) = result.bindings.as_object() {
                 // Check for deny
-                if let Some(deny) = bindings.get("deny") {
+                if let Some(deny) = obj.get(&"deny".into()) {
                     if let Some(arr) = deny.as_array() {
                         if !arr.is_empty() {
                             decision = Decision::Deny;
@@ -107,7 +106,7 @@ impl PolicyEngine {
                 }
 
                 // Check for require_approval
-                if let Some(approval) = bindings.get("require_approval") {
+                if let Some(approval) = obj.get(&"require_approval".into()) {
                     if let Some(arr) = approval.as_array() {
                         if !arr.is_empty() && decision != Decision::Deny {
                             decision = Decision::RequireApproval;
@@ -123,7 +122,7 @@ impl PolicyEngine {
                 }
 
                 // Check for reasons
-                if let Some(r) = bindings.get("reasons") {
+                if let Some(r) = obj.get(&"reasons".into()) {
                     if let Some(arr) = r.as_array() {
                         for reason in arr {
                             if let Some(s) = reason.as_str() {
@@ -227,7 +226,7 @@ async fn create_policy_impl(state: &AppState, req: CreatePolicyRequest) -> Resul
         r#"
         INSERT INTO policies (id, name, description, version, rego_source, is_active, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, true, $6, $6)
-        RETURNING id, name, description, version, rego_source, is_active, created_by, created_at, updated_at
+        RETURNING id, name, description, version, rego_source, is_active as "is_active!", created_by as "created_by!", created_at as "created_at!", updated_at as "updated_at!"
         "#,
         id,
         req.name,
@@ -278,7 +277,7 @@ async fn list_policies_impl(
     let policies = sqlx::query_as!(
         Policy,
         r#"
-        SELECT id, name, description, version, rego_source, is_active, created_by, created_at, updated_at
+        SELECT id, name, description, version, rego_source, is_active as "is_active!", created_by as "created_by!", created_at as "created_at!", updated_at as "updated_at!"
         FROM policies
         WHERE ($3::boolean = false OR is_active = true)
         ORDER BY created_at DESC
@@ -322,7 +321,7 @@ async fn get_policy_impl(db: &PgPool, id: Uuid) -> Result<Policy> {
     let policy = sqlx::query_as!(
         Policy,
         r#"
-        SELECT id, name, description, version, rego_source, is_active, created_by, created_at, updated_at
+        SELECT id, name, description, version, rego_source, is_active as "is_active!", created_by as "created_by!", created_at as "created_at!", updated_at as "updated_at!"
         FROM policies
         WHERE id = $1
         "#,
@@ -418,7 +417,7 @@ async fn check_action_impl(state: &AppState, req: CheckActionRequest) -> Result<
         sqlx::query!(
             r#"
             INSERT INTO policy_decisions (id, identity_id, policy_id, policy_version, action_type, action_payload, context, decision, reasons, required_approvers, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8::decision, $9, $10, $11)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             "#,
             decision_id,
             req.identity_id,
@@ -427,7 +426,7 @@ async fn check_action_impl(state: &AppState, req: CheckActionRequest) -> Result<
             format!("{:?}", req.action.action_type),
             serde_json::to_value(&req.action)?,
             serde_json::to_value(&req.context)?,
-            eval_result.decision.to_string(),
+            eval_result.decision as Decision,
             &eval_result.reasons,
             &eval_result.required_approvers,
             now,
@@ -521,7 +520,7 @@ async fn activate_policy_impl(state: &AppState, id: Uuid, active: bool) -> Resul
         UPDATE policies
         SET is_active = $2, updated_at = $3
         WHERE id = $1
-        RETURNING id, name, description, version, rego_source, is_active, created_by, created_at, updated_at
+        RETURNING id, name, description, version, rego_source, is_active as "is_active!", created_by as "created_by!", created_at as "created_at!", updated_at as "updated_at!"
         "#,
         id,
         active,

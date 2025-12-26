@@ -10,8 +10,8 @@ use axum::{
     Json, Router,
 };
 use guardrail_shared::{
-    ApiResponse, CreateIdentityRequest, Identity, IdentityKey, Credential,
-    PaginatedResponse, GuardRailError, Result,
+    ApiResponse, CreateIdentityRequest, Credential, CredentialType, GuardRailError,
+    Identity, IdentityKey, IdentityType, KeyType, PaginatedResponse, Result,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
@@ -45,7 +45,7 @@ pub struct ListQuery {
 
 #[derive(Debug, Deserialize)]
 pub struct AttachKeyRequest {
-    pub key_type: String,
+    pub key_type: KeyType,
     pub public_key: String,
     pub chain: Option<String>,
     pub label: Option<String>,
@@ -53,7 +53,7 @@ pub struct AttachKeyRequest {
 
 #[derive(Debug, Deserialize)]
 pub struct AddCredentialRequest {
-    pub credential_type: String,
+    pub credential_type: CredentialType,
     pub provider: String,
     pub value: serde_json::Value,
     pub expires_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -101,7 +101,7 @@ async fn create_identity_impl(db: &PgPool, req: CreateIdentityRequest) -> Result
         r#"
         INSERT INTO identities (id, identity_type, external_id, display_name, metadata, organization_id, is_active, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, true, $7, $7)
-        RETURNING id, identity_type as "identity_type: IdentityType", external_id, display_name, metadata, organization_id, is_active, created_at, updated_at
+        RETURNING id, identity_type as "identity_type: IdentityType", external_id, display_name, metadata, organization_id, is_active as "is_active!", created_at as "created_at!", updated_at as "updated_at!"
         "#,
         id,
         req.identity_type as IdentityType,
@@ -148,7 +148,7 @@ async fn list_identities_impl(
     let identities = sqlx::query_as!(
         Identity,
         r#"
-        SELECT id, identity_type as "identity_type: _", external_id, display_name, metadata, organization_id, is_active, created_at, updated_at
+        SELECT id, identity_type as "identity_type: IdentityType", external_id, display_name, metadata, organization_id, is_active as "is_active!", created_at as "created_at!", updated_at as "updated_at!"
         FROM identities
         WHERE is_active = true
         AND ($3::text IS NULL OR display_name ILIKE $3 OR external_id ILIKE $3)
@@ -194,7 +194,7 @@ async fn get_identity_impl(db: &PgPool, id: Uuid) -> Result<Identity> {
     let identity = sqlx::query_as!(
         Identity,
         r#"
-        SELECT id, identity_type as "identity_type: _", external_id, display_name, metadata, organization_id, is_active, created_at, updated_at
+        SELECT id, identity_type as "identity_type: IdentityType", external_id, display_name, metadata, organization_id, is_active as "is_active!", created_at as "created_at!", updated_at as "updated_at!"
         FROM identities
         WHERE id = $1 AND is_active = true
         "#,
@@ -242,7 +242,7 @@ async fn update_identity_impl(db: &PgPool, id: Uuid, updates: serde_json::Value)
         UPDATE identities
         SET display_name = $2, metadata = $3, updated_at = $4
         WHERE id = $1 AND is_active = true
-        RETURNING id, identity_type as "identity_type: _", external_id, display_name, metadata, organization_id, is_active, created_at, updated_at
+        RETURNING id, identity_type as "identity_type: IdentityType", external_id, display_name, metadata, organization_id, is_active as "is_active!", created_at as "created_at!", updated_at as "updated_at!"
         "#,
         id,
         display_name,
@@ -316,12 +316,12 @@ async fn attach_key_impl(db: &PgPool, identity_id: Uuid, req: AttachKeyRequest) 
         IdentityKey,
         r#"
         INSERT INTO identity_keys (id, identity_id, key_type, public_key, chain, label, is_primary, created_at)
-        VALUES ($1, $2, $3::key_type, $4, $5, $6, false, $7)
-        RETURNING id, identity_id, key_type as "key_type: _", public_key, chain, label, is_primary, verified_at, created_at
+        VALUES ($1, $2, $3, $4, $5, $6, false, $7)
+        RETURNING id, identity_id, key_type as "key_type: KeyType", public_key, chain, label, is_primary as "is_primary!", verified_at, created_at as "created_at!"
         "#,
         id,
         identity_id,
-        req.key_type,
+        req.key_type as KeyType,
         req.public_key,
         req.chain,
         req.label,
@@ -390,12 +390,12 @@ async fn add_credential_impl(db: &PgPool, identity_id: Uuid, req: AddCredentialR
         Credential,
         r#"
         INSERT INTO credentials (id, identity_id, credential_type, provider, value, expires_at, verified_at, created_at, updated_at)
-        VALUES ($1, $2, $3::credential_type, $4, $5, $6, $7, $7, $7)
-        RETURNING id, identity_id, credential_type as "credential_type: _", provider, value, expires_at, verified_at, created_at, updated_at
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $7)
+        RETURNING id, identity_id, credential_type as "credential_type: CredentialType", provider, value, expires_at, verified_at, created_at as "created_at!", updated_at as "updated_at!"
         "#,
         id,
         identity_id,
-        req.credential_type,
+        req.credential_type as CredentialType,
         req.provider,
         req.value,
         req.expires_at,

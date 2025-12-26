@@ -19,3 +19,6 @@ tracing-subscriber = { workspace = true }
 tower-http = { version = "0.5", features = ["cors", "trace"] }
 reqwest = { version = "0.12", features = ["json"] }
 ethers = "2.0"
+dotenvy = "0.15"
+solana-client = "1.18"
+solana-sdk = "1.18"

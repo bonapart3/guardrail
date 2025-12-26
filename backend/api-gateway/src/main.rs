@@ -295,7 +295,7 @@ async fn create_api_key_impl(
     // Generate random API key
     let key_bytes: [u8; 32] = rand::random();
     let api_key = format!("gr_{}", hex::encode(key_bytes));
-    let key_prefix = &api_key[..10];
+    let key_prefix = api_key[..10].to_string();
     
     // Hash the key for storage
     let key_hash = crypto::sha256_hex(api_key.as_bytes());
@@ -312,7 +312,7 @@ async fn create_api_key_impl(
         id,
         req.name,
         key_hash,
-        key_prefix,
+        &key_prefix,
         &req.scopes,
         user.org_id,
         user.user_id,
@@ -325,7 +325,7 @@ async fn create_api_key_impl(
         id,
         name: req.name,
         key: api_key,
-        prefix: key_prefix.to_string(),
+        prefix: key_prefix,
         scopes: req.scopes,
         expires_at,
     })

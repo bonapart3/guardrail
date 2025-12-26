@@ -108,7 +108,7 @@ pub struct EventTypeCount {
     pub count: i64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ExportRequest {
     pub from_sequence: Option<i64>,
     pub to_sequence: Option<i64>,
@@ -353,11 +353,11 @@ async fn create_event_impl(state: &AppState, req: CreateEventRequest) -> Result<
         MovementEvent,
         r#"
         INSERT INTO movement_events (id, event_type, actor_id, policy_decision_id, payload, previous_hash, event_hash, created_at)
-        VALUES ($1, $2::event_type, $3, $4, $5, $6, $7, $8)
-        RETURNING id, sequence_number, event_type as "event_type: _", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, sequence_number, event_type as "event_type: EventType", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at as "created_at!"
         "#,
         id,
-        req.event_type.to_string(),
+        req.event_type as EventType,
         req.actor_id,
         req.policy_decision_id,
         req.payload,
@@ -410,7 +410,7 @@ async fn list_events_impl(
     let events = sqlx::query_as!(
         MovementEvent,
         r#"
-        SELECT id, sequence_number, event_type as "event_type: _", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at
+        SELECT id, sequence_number, event_type as "event_type: EventType", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at as "created_at!"
         FROM movement_events
         WHERE ($3::uuid IS NULL OR actor_id = $3)
         AND ($4::timestamptz IS NULL OR created_at >= $4)
@@ -466,7 +466,7 @@ async fn get_event_impl(db: &PgPool, id: Uuid) -> Result<MovementEvent> {
     let event = sqlx::query_as!(
         MovementEvent,
         r#"
-        SELECT id, sequence_number, event_type as "event_type: _", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at
+        SELECT id, sequence_number, event_type as "event_type: EventType", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at as "created_at!"
         FROM movement_events
         WHERE id = $1
         "#,
@@ -581,7 +581,7 @@ async fn verify_chain_impl(db: &PgPool, query: VerifyChainQuery) -> Result<Chain
     let events = sqlx::query_as!(
         MovementEvent,
         r#"
-        SELECT id, sequence_number, event_type as "event_type: _", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at
+        SELECT id, sequence_number, event_type as "event_type: EventType", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at as "created_at!"
         FROM movement_events
         WHERE sequence_number >= $1 AND sequence_number <= $2
         ORDER BY sequence_number ASC
@@ -592,7 +592,7 @@ async fn verify_chain_impl(db: &PgPool, query: VerifyChainQuery) -> Result<Chain
     )
     .fetch_all(db)
     .await?;
-    
+
     let mut errors = Vec::new();
     
     // Verify hash chain
@@ -661,7 +661,7 @@ async fn get_stats_impl(db: &PgPool) -> Result<LedgerStats> {
         SELECT event_type::text as "event_type!", COUNT(*) as "count!"
         FROM movement_events
         GROUP BY event_type
-        ORDER BY count DESC
+        ORDER BY 2 DESC
         "#
     )
     .fetch_all(db)
@@ -701,7 +701,7 @@ async fn export_events_impl(db: &PgPool, req: ExportRequest) -> Result<ExportRes
     let events = sqlx::query_as!(
         MovementEvent,
         r#"
-        SELECT id, sequence_number, event_type as "event_type: _", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at
+        SELECT id, sequence_number, event_type as "event_type: EventType", actor_id, policy_decision_id, payload, previous_hash, event_hash, anchor_batch_id, created_at as "created_at!"
         FROM movement_events
         WHERE ($1::bigint IS NULL OR sequence_number >= $1)
         AND ($2::bigint IS NULL OR sequence_number <= $2)

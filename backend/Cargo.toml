@@ -4,7 +4,7 @@ members = [
     "identity-service",
     "policy-engine",
     "movement-ledger",
-    "chain-anchor",
+    # "chain-anchor",  # Temporarily disabled due to Solana SDK conflicts
     "api-gateway",
 ]
 resolver = "2"
