@@ -1,8 +1,18 @@
 # Chain Anchor Dockerfile
-FROM rust:1.75-slim-bookworm AS builder
+FROM rust:1.80-slim-bookworm AS builder
 WORKDIR /app
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
-COPY . .
+
+# Copy workspace files
+COPY Cargo.toml Cargo.lock ./
+COPY shared ./shared
+COPY identity-service ./identity-service
+COPY api-gateway ./api-gateway
+COPY policy-engine ./policy-engine
+COPY movement-ledger ./movement-ledger
+COPY chain-anchor ./chain-anchor
+
+# Build only chain-anchor
 RUN cargo build --release --bin chain-anchor
 
 FROM debian:bookworm-slim
