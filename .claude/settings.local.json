@@ -3,7 +3,22 @@
     "allow": [
       "Bash(head:*)",
       "Bash(cat:*)",
-      "Bash(cargo check:*)"
+      "Bash(cargo check:*)",
+      "Bash(if [ -f .env ])",
+      "Bash(then echo \".env EXISTS\")",
+      "Bash(else echo \".env DOES NOT EXIST - needs to be created from .env.example\")",
+      "Bash(fi)",
+      "Bash(if [ -f \"scripts/init.sql\" ])",
+      "Bash(then echo \"EXISTS\")",
+      "Bash(else echo \"MISSING!\")",
+      "Bash(for svc in api-gateway identity-service policy-engine movement-ledger chain-anchor)",
+      "Bash(do if [ -f \"backend/$svc/Dockerfile\" ])",
+      "Bash(then echo \"$svc/Dockerfile: EXISTS\")",
+      "Bash(else echo \"$svc/Dockerfile: MISSING!\")",
+      "Bash(done)",
+      "Bash(if [ -f \"frontend/Dockerfile\" ])",
+      "Bash(docker compose:*)",
+      "Bash(docker ps:*)"
     ]
   }
 }

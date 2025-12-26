@@ -79,6 +79,7 @@ guardrail/
 ### Check Action (Primary SDK Interface)
 
 **Request:**
+
 ```json
 {
   "identity_id": "uuid",
@@ -94,6 +95,7 @@ guardrail/
 ```
 
 **Response:**
+
 ```json
 {
   "decision": "REQUIRE_APPROVAL",
@@ -106,6 +108,7 @@ guardrail/
 ## Data Flow
 
 ### Policy Check Flow
+
 1. Customer System → `POST /api/v1/check`
 2. API Gateway authenticates
 3. Identity Service retrieves identity + credentials
@@ -115,6 +118,7 @@ guardrail/
 7. Return decision
 
 ### Anchor Flow (Hourly)
+
 1. Query uncommitted events
 2. Build Merkle tree from event hashes
 3. Submit root to Ethereum L2 + Solana
@@ -123,11 +127,13 @@ guardrail/
 ## Security Model
 
 ### Authentication
+
 - Console: JWT (Supabase Auth)
 - API: API Key + Secret (hashed with Argon2)
 - Internal: mTLS
 
 ### RBAC Roles
+
 - `super_admin`: Full access
 - `risk_officer`: Approvals, all events
 - `compliance`: Read-only audit, exports

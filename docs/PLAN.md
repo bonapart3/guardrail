@@ -11,17 +11,20 @@ Exchanges, trading desks, on/off-ramps, and RWA/CeDeFi/fintech platforms face gr
 3. **Produce clean, regulator-friendly, cryptographically verifiable logs** of user and agent activity
 
 Existing solutions either:
+
 - Focus on KYC alone (who you are) without programmable policies and movement trails
 - Are internal/custom and not reusable or standardized across chains and platforms
 
 ## Target Users
 
 ### Primary Customers (Initial Focus)
+
 - Centralized and hybrid exchanges / prime brokers
 - Prop-trading desks and crypto market-makers using bots/agents
 - RWA / CeDeFi platforms, crypto banks, and fintechs providing yield, credit, or tokenized assets
 
 ### End Users
+
 - Risk and compliance teams (dashboard users)
 - Developers integrating via SDK
 - Operations teams managing approvals
@@ -29,6 +32,7 @@ Existing solutions either:
 ## Core Features (MVP)
 
 ### Identity & Credential Service
+
 - [ ] Represent humans, AI/agents/bots, organizations, and roles
 - [ ] Store core profiles (IDs, KYC provider refs, risk scores)
 - [ ] Bind cryptographic keys/identifiers (wallet addresses, agent keys, device IDs)
@@ -36,6 +40,7 @@ Existing solutions either:
 - [ ] Pluggable adapters for external KYC/AML providers
 
 ### Policy Engine
+
 - [ ] Policy definition via OPA/Rego DSL
 - [ ] Real-time rules evaluation on every sensitive action
 - [ ] Policy versioning and history (linked to movement events for audit)
@@ -43,6 +48,7 @@ Existing solutions either:
 - [ ] Test harness for simulating policies against historical data
 
 ### Movement / Audit Ledger
+
 - [ ] Append-only event store with immutable semantics
 - [ ] Every event captures: actor, policy context, action details, decision, cryptographic commitments
 - [ ] Hash-chaining for tamper evidence
@@ -50,18 +56,21 @@ Existing solutions either:
 - [ ] CQRS separation for read/write optimization
 
 ### Chain Anchoring
+
 - [ ] Periodic Merkle tree commitments to Ethereum L2
 - [ ] Periodic Merkle tree commitments to Solana
 - [ ] Smart contracts/programs storing commitments with metadata
 - [ ] Proof reconstruction APIs
 
 ### Admin Console
+
 - [ ] Policy builder (wizard + advanced Rego editor)
 - [ ] Timeline view of high-risk events and approvals
 - [ ] Investigator view: search by identity, wallet, or agent
 - [ ] Compliance export (PDF/CSV/JSON with cryptographic proofs)
 
 ### SDKs
+
 - [ ] TypeScript/Node SDK with `checkAction()` interface
 - [ ] Python SDK with equivalent functionality
 - [ ] Webhook/streaming support for real-time enforcement
@@ -120,16 +129,19 @@ AnchorBatch
 ## Integrations
 
 ### Authentication & Authorization
+
 - JWT-based API authentication
 - RBAC for console access
 - API key management for SDK integrations
 
 ### External Services
+
 - Pluggable KYC/AML provider adapters (Chainalysis, Elliptic, etc.)
 - Webhook endpoints for customer system integration
 - Kafka/WebSocket streaming for real-time events
 
 ### Blockchain
+
 - Ethereum L2 (Arbitrum/Base) for anchoring
 - Solana for anchoring
 - Read: verify transaction origin, wallet ownership
@@ -138,6 +150,7 @@ AnchorBatch
 ## Deployment Target
 
 ### Production Architecture
+
 - Containerized microservices (Docker)
 - Kubernetes orchestration
 - PostgreSQL (managed) for persistent storage
@@ -145,6 +158,7 @@ AnchorBatch
 - Multi-region capable
 
 ### Development
+
 - Docker Compose for local development
 - Hot reload for all services
 - Local PostgreSQL + Redis
@@ -164,6 +178,7 @@ AnchorBatch
 | API Gateway | Rust | Axum | Unified stack, consistent error handling, high throughput |
 
 **Why Rust over Go for this project:**
+
 - Memory safety without GC pauses — critical for real-time policy decisions
 - Native Solana ecosystem (Solana programs are Rust)
 - `regorus` crate provides native Rego evaluation (no OPA sidecar needed)
@@ -229,12 +244,14 @@ AnchorBatch
 ## Console Features (Full from Day 1)
 
 ### Dashboard
+
 - Real-time policy decision feed
 - Key metrics: decisions/hour, approval rate, blocked actions
 - Risk score distribution charts
 - Recent high-risk events
 
 ### Identity Management
+
 - Create/edit humans, agents, organizations
 - Credential binding (wallets, keys)
 - KYC status tracking
@@ -242,6 +259,7 @@ AnchorBatch
 - Role assignment
 
 ### Policy Builder
+
 - Visual policy wizard for common rules
 - Advanced Rego editor with syntax highlighting
 - Policy simulation/testing against sample data
@@ -249,6 +267,7 @@ AnchorBatch
 - Activate/deactivate policies
 
 ### Movement Ledger / Audit Trail
+
 - Searchable event timeline
 - Filter by identity, action type, decision, date range
 - Event detail view with full context
@@ -256,12 +275,14 @@ AnchorBatch
 - Export to PDF/CSV/JSON with cryptographic attestation
 
 ### Approval Workflow
+
 - Pending approvals queue
 - Approve/reject with comments
 - Escalation rules
 - Notification preferences
 
 ### Settings & Configuration
+
 - Organization settings
 - API key management
 - Webhook configuration
@@ -275,6 +296,7 @@ AnchorBatch
 **Target**: External customers (exchanges, trading desks, RWA platforms)
 **Design Partner #1**: Tyler / Veridicus ecosystem
 **Pricing Model** (future):
+
 - Base subscription by org size
 - Usage: identities/agents under governance, policy checks, events
 - Premium: advanced analytics, custom deployments
@@ -290,6 +312,7 @@ AnchorBatch
 - SDK integration time < 1 dayput |
 
 ### Policy Engine Details
+
 - **OPA (Open Policy Agent)**: CNCF-graduated, evaluates thousands of policies/second
 - **Rego**: Purpose-built declarative policy language for complex hierarchical data
 - **Deployment**: OPA as sidecar or embedded via `opa-wasm` for lowest latency
@@ -338,11 +361,13 @@ AnchorBatch
 ## Go-to-Market
 
 ### Initial Wedge
+
 - 2-3 design partners: one exchange/brokerage, one RWA/DeFi platform, one prop-desk with bots
 - Pilot focused on large withdrawals OR agent trading permissions
 - Co-design policies and dashboards with partners
 
 ### Pricing Model
+
 - Base subscription by organization size and environment count
 - Usage component: identities/agents under governance, policy checks volume
 - Premium: advanced analytics, custom data residency, dedicated support
@@ -352,12 +377,14 @@ AnchorBatch
 ## Success Metrics
 
 ### Technical
+
 - Policy evaluation latency < 10ms p99
 - Event ingestion throughput > 10,000 events/sec
 - Zero data loss (append-only with replication)
 - Anchor batches within 1 hour of events
 
 ### Business
+
 - 3 design partners onboarded in Phase 1
 - < 1 day integration time with SDK
 - Compliance audit prep time reduced by 50%+

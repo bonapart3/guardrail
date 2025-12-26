@@ -8,4 +8,4 @@ pub mod crypto;
 
 pub use types::*;
 pub use errors::*;
-pub use crypto::Sha256;
+pub use crypto::*;
