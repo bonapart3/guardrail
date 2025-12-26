@@ -204,16 +204,25 @@ async fn login_impl(state: &AppState, req: LoginRequest) -> Result<LoginResponse
     // Verify password
     let password_hash = user.password_hash
         .ok_or_else(|| GuardRailError::Unauthorized("Invalid credentials".to_string()))?;
-    
+
+    tracing::debug!("Password hash from DB: {}", password_hash);
+    tracing::debug!("Password from request: {}", req.password);
+
     let parsed_hash = argon2::PasswordHash::new(&password_hash)
-        .map_err(|_| GuardRailError::Unauthorized("Invalid credentials".to_string()))?;
-    
+        .map_err(|e| {
+            tracing::error!("Failed to parse hash: {:?}", e);
+            GuardRailError::Unauthorized("Invalid credentials".to_string())
+        })?;
+
     argon2::PasswordVerifier::verify_password(
         &argon2::Argon2::default(),
         req.password.as_bytes(),
         &parsed_hash,
     )
-    .map_err(|_| GuardRailError::Unauthorized("Invalid credentials".to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Password verification failed: {:?}", e);
+        GuardRailError::Unauthorized("Invalid credentials".to_string())
+    })?;
     
     // Generate JWT
     let now = SystemTime::now()
