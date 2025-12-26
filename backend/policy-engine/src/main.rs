@@ -88,44 +88,44 @@ impl PolicyEngine {
 
         for result in results.result.iter() {
             // Get bindings as object if possible
-            if let Some(obj) = result.bindings.as_object() {
+            if let Ok(obj) = result.bindings.as_object() {
                 // Check for deny
                 if let Some(deny) = obj.get(&"deny".into()) {
-                    if let Some(arr) = deny.as_array() {
+                    if let Ok(arr) = deny.as_array() {
                         if !arr.is_empty() {
                             decision = Decision::Deny;
                             for reason in arr {
-                                if let Some(s) = reason.as_str() {
+                                if let Ok(s) = reason.as_string() {
                                     reasons.push(s.to_string());
                                 }
                             }
                         }
-                    } else if deny.as_bool() == Some(true) {
+                    } else if deny.as_bool().ok() == Some(&true) {
                         decision = Decision::Deny;
                     }
                 }
 
                 // Check for require_approval
                 if let Some(approval) = obj.get(&"require_approval".into()) {
-                    if let Some(arr) = approval.as_array() {
+                    if let Ok(arr) = approval.as_array() {
                         if !arr.is_empty() && decision != Decision::Deny {
                             decision = Decision::RequireApproval;
                             for approver in arr {
-                                if let Some(s) = approver.as_str() {
+                                if let Ok(s) = approver.as_string() {
                                     required_approvers.push(s.to_string());
                                 }
                             }
                         }
-                    } else if approval.as_bool() == Some(true) && decision != Decision::Deny {
+                    } else if approval.as_bool().ok() == Some(&true) && decision != Decision::Deny {
                         decision = Decision::RequireApproval;
                     }
                 }
 
                 // Check for reasons
                 if let Some(r) = obj.get(&"reasons".into()) {
-                    if let Some(arr) = r.as_array() {
+                    if let Ok(arr) = r.as_array() {
                         for reason in arr {
-                            if let Some(s) = reason.as_str() {
+                            if let Ok(s) = reason.as_string() {
                                 if !reasons.contains(&s.to_string()) {
                                     reasons.push(s.to_string());
                                 }

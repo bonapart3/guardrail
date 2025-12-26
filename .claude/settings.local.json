@@ -24,7 +24,9 @@
       "Bash(docker exec:*)",
       "Bash(DATABASE_URL=\"postgres://guardrail:guardrail_dev@localhost:5432/guardrail\" cargo build:*)",
       "Bash(DATABASE_URL=\"postgres://guardrail:guardrail_dev@localhost:5432/guardrail\" cargo check:*)",
-      "Bash(cargo update:*)"
+      "Bash(cargo update:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
