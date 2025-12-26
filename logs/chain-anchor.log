@@ -115,3 +115,9 @@ help: available bin targets:
     identity-service
     movement-ledger
     policy-engine
+error: no bin target named `chain-anchor` in default-run packages
+help: available bin targets:
+    api-gateway
+    identity-service
+    movement-ledger
+    policy-engine

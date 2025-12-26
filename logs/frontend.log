@@ -271,3 +271,16 @@ Error: listen EADDRINUSE: address already in use :::3010
   port: 3010
 }
 [?25h
+
+> guardrail-console@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.0
+  - Local:        http://localhost:3010
+
+ ✓ Starting...
+ ⚠ Invalid next.config.js options detected: 
+ ⚠     Expected object, received boolean at "experimental.serverActions"
+ ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+ ⚠ Server Actions are available by default now, `experimental.serverActions` option can be safely removed.
+ ✓ Ready in 23.2s

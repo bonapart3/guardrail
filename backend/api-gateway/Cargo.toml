@@ -24,6 +24,7 @@ dotenvy = "0.15"
 rand = "0.8"
 hex = "0.4"
 sha2 = "0.10"
+governor = "0.6"
 
 # Documentation
 utoipa = { version = "4.2", features = ["axum_extras", "uuid", "chrono"] }

@@ -73,3 +73,4 @@ warning: `api-gateway` (bin "api-gateway") generated 2 warnings (run `cargo fix 
 [2m2025-12-26T03:54:30.047633Z[0m [32m INFO[0m [2mapi_gateway[0m[2m:[0m API Gateway listening on 0.0.0.0:3000
 Error: Only one usage of each socket address (protocol/network address/port) is normally permitted. (os error 10048)
 error: process didn't exit successfully: `target\release\api-gateway.exe` (exit code: 1)
+    Blocking waiting for file lock on build directory

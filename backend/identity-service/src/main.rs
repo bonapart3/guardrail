@@ -9,6 +9,7 @@ use axum::{
     routing::{delete, get, patch, post},
     Json, Router,
 };
+use base64;
 use guardrail_shared::{
     ApiResponse, CreateIdentityRequest, Credential, CredentialType, GuardRailError,
     Identity, IdentityKey, IdentityType, KeyType, PaginatedResponse, Result,
@@ -57,6 +58,14 @@ pub struct AddCredentialRequest {
     pub provider: String,
     pub value: serde_json::Value,
     pub expires_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct BindZkCredentialRequest {
+    pub credential_type: CredentialType,
+    pub provider: String,
+    pub proof: Vec<u8>,
+    pub public_inputs: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -407,6 +416,52 @@ async fn add_credential_impl(db: &PgPool, identity_id: Uuid, req: AddCredentialR
     Ok(credential)
 }
 
+async fn bind_zk_credential(
+    State(state): State<Arc<AppState>>,
+    Path(identity_id): Path<Uuid>,
+    Json(req): Json<BindZkCredentialRequest>,
+) -> impl IntoResponse {
+    match bind_zk_credential_impl(&state.db, identity_id, req).await {
+        Ok(credential) => (StatusCode::CREATED, Json(ApiResponse::success(credential))),
+        Err(e) => {
+            let status = StatusCode::from_u16(e.status_code()).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+            (status, Json(ApiResponse::<Credential>::error(e.error_code(), e.to_string())))
+        }
+    }
+}
+
+async fn bind_zk_credential_impl(db: &PgPool, identity_id: Uuid, req: BindZkCredentialRequest) -> Result<Credential> {
+    // Verify identity exists
+    let _ = get_identity_impl(db, identity_id).await?;
+
+    // For now, store the ZK proof data without full verification
+    // TODO: Implement full ZK verification with proper key management
+    let id = Uuid::new_v4();
+    let now = chrono::Utc::now();
+
+    let credential = sqlx::query_as!(
+        Credential,
+        r#"
+        INSERT INTO credentials (id, identity_id, credential_type, provider, value, expires_at, verified_at, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, NULL, $6, $6, $6)
+        RETURNING id, identity_id, credential_type as "credential_type: CredentialType", provider, value, expires_at, verified_at, created_at as "created_at!", updated_at as "updated_at!"
+        "#,
+        id,
+        identity_id,
+        req.credential_type as CredentialType,
+        req.provider,
+        serde_json::json!({
+            "zk_proof": base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &req.proof),
+            "public_inputs": req.public_inputs
+        }),
+        now,
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(credential)
+}
+
 // ============================================================================
 // Router
 // ============================================================================
@@ -426,6 +481,8 @@ fn create_router(state: Arc<AppState>) -> Router {
         .route("/api/v1/identities/:id/keys/:key_id", delete(detach_key))
         // Credential management
         .route("/api/v1/identities/:id/credentials", post(add_credential))
+        // ZK credential binding
+        .route("/api/v1/identities/:id/zk-bind", post(bind_zk_credential))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive())

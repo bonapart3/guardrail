@@ -49,3 +49,4 @@ warning: `movement-ledger` (bin "movement-ledger") generated 1 warning
 [2m2025-12-26T03:53:17.191027Z[0m [32m INFO[0m [2mmovement_ledger[0m[2m:[0m Movement Ledger listening on 0.0.0.0:3003
 Error: Only one usage of each socket address (protocol/network address/port) is normally permitted. (os error 10048)
 error: process didn't exit successfully: `target\release\movement-ledger.exe` (exit code: 1)
+    Blocking waiting for file lock on build directory

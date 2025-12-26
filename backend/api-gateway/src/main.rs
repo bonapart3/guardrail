@@ -15,6 +15,8 @@ use axum::{
     routing::{any, get, post},
     Json, Router,
 };
+use governor::{clock::DefaultClock, middleware::NoOpMiddleware, state::keyed::DashMapStateStore, Quota, RateLimiter};
+use std::num::NonZeroU32;
 use guardrail_shared::{crypto, ApiResponse, GuardRailError, Result};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -39,6 +41,7 @@ pub struct AppState {
     pub db: PgPool,
     pub config: Arc<GatewayConfig>,
     pub http_client: reqwest::Client,
+    pub rate_limiter: Arc<RateLimiter<String, DashMapStateStore<String>, DefaultClock, NoOpMiddleware>>,
 }
 
 #[derive(Clone, Debug)]
@@ -706,6 +709,43 @@ async fn handle_anchor(
 }
 
 // ============================================================================
+// Middleware
+// ============================================================================
+
+async fn rate_limit_middleware(
+    State(state): State<Arc<AppState>>,
+    req: Request<Body>,
+    next: Next,
+) -> Response {
+    // Get client IP for rate limiting
+    let client_ip = req
+        .headers()
+        .get("x-forwarded-for")
+        .and_then(|hv| hv.to_str().ok())
+        .unwrap_or("unknown")
+        .split(',')
+        .next()
+        .unwrap_or("unknown")
+        .trim();
+
+    // Check rate limit
+    match state.rate_limiter.check_key(&client_ip.to_string()) {
+        Ok(_) => {
+            // Rate limit not exceeded, proceed
+            next.run(req).await
+        }
+        Err(_) => {
+            // Rate limit exceeded
+            let error_response = ApiResponse::<()>::error(
+                "RATE_LIMIT_EXCEEDED".to_string(),
+                "Too many requests. Please try again later.".to_string(),
+            );
+            (StatusCode::TOO_MANY_REQUESTS, Json(error_response)).into_response()
+        }
+    }
+}
+
+// ============================================================================
 // Router
 // ============================================================================
 
@@ -774,6 +814,7 @@ fn create_router(state: Arc<AppState>) -> Router {
     Router::new()
         .merge(public_routes)
         .merge(protected_routes)
+        .layer(middleware::from_fn_with_state(state.clone(), rate_limit_middleware))
         .with_state(state)
         .layer(TraceLayer::new_for_http())
         .layer(cors)
@@ -864,11 +905,16 @@ async fn main() -> anyhow::Result<()> {
         .timeout(Duration::from_secs(30))
         .build()?;
 
+    // Create rate limiter
+    let quota = Quota::per_second(NonZeroU32::new(config.rate_limit_requests as u32).unwrap());
+    let rate_limiter = Arc::new(RateLimiter::dashmap(quota));
+
     // Create app state
     let state = Arc::new(AppState {
         db,
         config: Arc::new(config),
         http_client,
+        rate_limiter,
     });
 
     // Create router

@@ -83,6 +83,10 @@ pub enum GuardRailError {
     #[error("Invalid input: {0}")]
     InvalidInput(String),
 
+    // Crypto/ZK errors
+    #[error("Cryptographic error: {0}")]
+    CryptoError(String),
+
     // Auth errors
     #[error("Unauthorized: {0}")]
     Unauthorized(String),
@@ -127,7 +131,7 @@ impl GuardRailError {
             | Self::ApprovalNotFound(_)
             | Self::AnchorNotFound(_)
             | Self::NotFound(_) => 404,
-            Self::Validation(_) | Self::InvalidField { .. } | Self::InvalidInput(_) | Self::InvalidRego(_) => 400,
+            Self::Validation(_) | Self::InvalidField { .. } | Self::InvalidInput(_) | Self::InvalidRego(_) | Self::CryptoError(_) => 400,
             Self::IdentityAlreadyExists(_)
             | Self::KeyAlreadyBound(_)
             | Self::ApprovalAlreadyProcessed
@@ -166,6 +170,7 @@ impl GuardRailError {
             Self::Validation(_) => "VALIDATION_ERROR",
             Self::InvalidField { .. } => "INVALID_FIELD",
             Self::InvalidInput(_) => "INVALID_INPUT",
+            Self::CryptoError(_) => "CRYPTO_ERROR",
             Self::KycProvider(_) => "KYC_PROVIDER_ERROR",
             Self::ExternalService(_) => "EXTERNAL_SERVICE_ERROR",
             Self::ServiceUnavailable(_) => "SERVICE_UNAVAILABLE",
