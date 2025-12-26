@@ -86,7 +86,9 @@ pub fn build_merkle_tree(hashes: &[String]) -> Option<MerkleNode> {
 
     // If odd number, duplicate last
     if nodes.len() % 2 == 1 {
-        nodes.push(nodes.last().unwrap().clone());
+        if let Some(last) = nodes.last().cloned() {
+            nodes.push(last);
+        }
     }
 
     // Build tree bottom-up
@@ -151,12 +153,14 @@ pub fn generate_merkle_proof(hashes: &[String], target_index: usize) -> Option<M
 
     // Pad to even length
     if current_hashes.len() % 2 == 1 {
-        current_hashes.push(current_hashes.last().unwrap().clone());
+        if let Some(last) = current_hashes.last().cloned() {
+            current_hashes.push(last);
+        }
     }
 
     while current_hashes.len() > 1 {
-        let sibling_index = if index % 2 == 0 { index + 1 } else { index - 1 };
-        let position = if index % 2 == 0 {
+        let sibling_index = if index.is_multiple_of(2) { index + 1 } else { index - 1 };
+        let position = if index.is_multiple_of(2) {
             ProofPosition::Right
         } else {
             ProofPosition::Left
@@ -176,7 +180,9 @@ pub fn generate_merkle_proof(hashes: &[String], target_index: usize) -> Option<M
 
         current_hashes = next_level;
         if current_hashes.len() % 2 == 1 && current_hashes.len() > 1 {
-            current_hashes.push(current_hashes.last().unwrap().clone());
+            if let Some(last) = current_hashes.last().cloned() {
+                current_hashes.push(last);
+            }
         }
         index /= 2;
     }

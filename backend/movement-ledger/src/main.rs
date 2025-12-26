@@ -240,8 +240,8 @@ pub fn generate_merkle_proof(event_hashes: &[String], target_index: usize) -> Ve
     }
     
     while current_level.len() > 1 {
-        let sibling_index = if index % 2 == 0 { index + 1 } else { index - 1 };
-        let position = if index % 2 == 0 { "right" } else { "left" };
+        let sibling_index = if index.is_multiple_of(2) { index + 1 } else { index - 1 };
+        let position = if index.is_multiple_of(2) { "right" } else { "left" };
         
         if sibling_index < current_level.len() {
             proof.push(ProofSibling {

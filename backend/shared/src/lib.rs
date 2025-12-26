@@ -5,7 +5,7 @@
 pub mod types;
 pub mod errors;
 pub mod crypto;
-pub mod zk_credential;
+// pub mod zk_credential;
 
 pub use types::*;
 pub use errors::*;

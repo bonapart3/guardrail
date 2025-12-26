@@ -166,7 +166,11 @@ pub fn build_merkle_root(event_hashes: &[String]) -> String {
     
     // Pad to power of 2 if needed
     while current_level.len().count_ones() != 1 {
-        current_level.push(current_level.last().unwrap().clone());
+        if let Some(last) = current_level.last().cloned() {
+            current_level.push(last);
+        } else {
+            break; // shouldn't happen
+        }
     }
     
     while current_level.len() > 1 {

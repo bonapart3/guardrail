@@ -40,35 +40,38 @@ impl<F: PrimeField> ConstraintSynthesizer<F> for AgeCheckCircuit<F> {
     }
 }
 
-pub fn generate_proof_artifacts() -> (ProvingKey<Bls12_381>, VerifyingKey<Bls12_381>) {
+pub fn generate_proof_artifacts() -> Result<(ProvingKey<Bls12_381>, VerifyingKey<Bls12_381>)> {
     let rng = &mut OsRng;
     let circuit = AgeCheckCircuit::<ark_bls12_381::Fr> {
         age: None,
         threshold: None,
     };
     
-    Groth16::<Bls12_381>::circuit_specific_setup(circuit, rng).unwrap()
+    Groth16::<Bls12_381>::circuit_specific_setup(circuit, rng).map_err(|e| GuardRailError::CryptoError(e.to_string()))
 }
 
 pub fn prove_age(
     pk: &ProvingKey<Bls12_381>,
     age: u64,
     threshold: u64,
-) -> Proof<Bls12_381> {
+) -> Result<Proof<Bls12_381>> {
     let rng = &mut OsRng;
     let circuit = AgeCheckCircuit {
         age: Some(ark_bls12_381::Fr::from(age)),
         threshold: Some(ark_bls12_381::Fr::from(threshold)),
     };
     
-    Groth16::<Bls12_381>::prove(pk, circuit, rng).unwrap()
+    Groth16::<Bls12_381>::prove(pk, circuit, rng).map_err(|e| GuardRailError::CryptoError(e.to_string()))
 }
 
 pub fn verify_age(
     vk: &VerifyingKey<Bls12_381>,
     proof: &Proof<Bls12_381>,
     threshold: u64,
-) -> bool {
+) -> Result<bool> {
     let public_inputs = vec![ark_bls12_381::Fr::from(threshold)];
-    Groth16::<Bls12_381>::verify(vk, &public_inputs, proof).unwrap()
+    match Groth16::<Bls12_381>::verify(vk, &public_inputs, proof) {
+        Ok(_) => Ok(true),
+        Err(_) => Ok(false),
+    }
 }

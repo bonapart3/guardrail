@@ -169,9 +169,17 @@ All core components implemented. Ready for testing and deployment.
 
 ## In Progress 🔄
 
+### Production Hardening Review ✅
+
+- [x] Remove remaining `.unwrap()` calls from production code (crypto.rs, zk_credential.rs, chain-anchor)
+- [x] Fix hardcoded password in hash-gen utility
+- [x] Audit for any remaining hardcoded secrets or defaults
+- [x] Verify all services have graceful shutdown implemented
+- [x] Confirm JSON logging is enabled across all services
+
 ### Documentation
 
-- [ ] OpenAPI spec generation
+- [x] OpenAPI spec generation
 - [ ] SDK README and examples
 - [ ] Deployment guide
 
@@ -186,6 +194,7 @@ All core components implemented. Ready for testing and deployment.
 
 ### Near-term
 
+- [ ] ZK-SNARKs Integration: Implement halo2/arkworks for privacy-preserving identity verification (bind ZK proofs to identities, extend policy engine for ZK checks)
 - [ ] Rate limiting middleware
 - [ ] Email notifications for approvals
 - [ ] Slack integration

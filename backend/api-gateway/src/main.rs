@@ -123,7 +123,7 @@ pub struct CreateApiKeyResponse {
 // Health Check
 // ============================================================================
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct HealthResponse {
     pub status: String,
     pub service: String,
@@ -131,7 +131,7 @@ pub struct HealthResponse {
     pub services: HashMap<String, ServiceHealth>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ServiceHealth {
     pub status: String,
     pub latency_ms: u64,
@@ -245,7 +245,7 @@ async fn login_impl(state: &AppState, req: LoginRequest) -> Result<LoginResponse
     // Generate JWT
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .unwrap()
+        .expect("System time is before UNIX epoch")
         .as_secs() as usize;
     
     let expiry = now + (state.config.jwt_expiry_hours as usize * 3600);
@@ -287,6 +287,15 @@ async fn login_impl(state: &AppState, req: LoginRequest) -> Result<LoginResponse
     })
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/api-keys",
+    request_body = CreateApiKeyRequest,
+    responses(
+        (status = 201, description = "API key created", body = CreateApiKeyResponse),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 async fn create_api_key(
     State(state): State<Arc<AppState>>,
     headers: HeaderMap,
@@ -370,8 +379,7 @@ async fn authenticate(state: &AppState, headers: &HeaderMap) -> Result<Authentic
     
     // Check for JWT
     if let Some(auth_header) = headers.get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()) {
-        if auth_header.starts_with("Bearer ") {
-            let token = &auth_header[7..];
+        if let Some(token) = auth_header.strip_prefix("Bearer ") {
             return authenticate_jwt(state, token).await;
         }
     }
@@ -455,7 +463,7 @@ async fn auth_middleware(
                 .status(StatusCode::UNAUTHORIZED)
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(body))
-                .unwrap()
+                .expect("Failed to build error response")
         }
     }
 }
@@ -507,13 +515,23 @@ async fn proxy_to_service(
         builder = builder.header(header::CONTENT_TYPE, content_type);
     }
     
-    Ok(builder.body(Body::from(body)).unwrap())
+    Ok(builder.body(Body::from(body)).expect("Failed to build proxied response"))
 }
 
 // ============================================================================
 // Route Handlers (Proxied)
 // ============================================================================
 
+#[utoipa::path(
+    get, post, put, delete,
+    path = "/api/v1/identities/{path:.*}",
+    tag = "identities",
+    responses(
+        (status = 200, description = "Identity operation successful"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 async fn proxy_identity(
     State(state): State<Arc<AppState>>,
     method: Method,
@@ -533,11 +551,21 @@ async fn proxy_identity(
                 .status(StatusCode::from_u16(e.status_code()).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR))
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(body))
-                .unwrap()
+                .expect("Failed to build error response")
         }
     }
 }
 
+#[utoipa::path(
+    get, post, put, delete,
+    path = "/api/v1/policies/{path:.*}",
+    tag = "policies",
+    responses(
+        (status = 200, description = "Policy operation successful"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 async fn proxy_policy(
     State(state): State<Arc<AppState>>,
     method: Method,
@@ -557,11 +585,21 @@ async fn proxy_policy(
                 .status(StatusCode::from_u16(e.status_code()).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR))
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(body))
-                .unwrap()
+                .expect("Failed to build error response")
         }
     }
 }
 
+#[utoipa::path(
+    get, post, put, delete,
+    path = "/api/v1/events/{path:.*}",
+    tag = "ledger",
+    responses(
+        (status = 200, description = "Ledger operation successful"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 async fn proxy_ledger(
     State(state): State<Arc<AppState>>,
     method: Method,
@@ -581,11 +619,21 @@ async fn proxy_ledger(
                 .status(StatusCode::from_u16(e.status_code()).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR))
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(body))
-                .unwrap()
+                .expect("Failed to build error response")
         }
     }
 }
 
+#[utoipa::path(
+    get, post, put, delete,
+    path = "/api/v1/anchor/{path:.*}",
+    tag = "anchor",
+    responses(
+        (status = 200, description = "Anchor operation successful"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 async fn proxy_anchor(
     State(state): State<Arc<AppState>>,
     method: Method,
@@ -605,7 +653,7 @@ async fn proxy_anchor(
                 .status(StatusCode::from_u16(e.status_code()).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR))
                 .header(header::CONTENT_TYPE, "application/json")
                 .body(Body::from(body))
-                .unwrap()
+                .expect("Failed to build error response")
         }
     }
 }
@@ -666,12 +714,25 @@ async fn handle_anchor(
     paths(
         health,
         login,
+        create_api_key,
+        proxy_identity,
+        proxy_policy,
+        proxy_ledger,
+        proxy_anchor,
     ),
     components(
-        schemas(LoginRequest, LoginResponse, UserInfo, CreateApiKeyRequest, CreateApiKeyResponse)
+        schemas(
+            LoginRequest, LoginResponse, UserInfo, CreateApiKeyRequest, CreateApiKeyResponse,
+            HealthResponse, ServiceHealth, ApiResponse<serde_json::Value>
+        )
     ),
     tags(
-        (name = "guardrail", description = "GuardRail API Gateway")
+        (name = "guardrail", description = "GuardRail API Gateway"),
+        (name = "auth", description = "Authentication endpoints"),
+        (name = "identities", description = "Identity management"),
+        (name = "policies", description = "Policy management"),
+        (name = "ledger", description = "Movement ledger"),
+        (name = "anchor", description = "Blockchain anchoring")
     )
 )]
 struct ApiDoc;

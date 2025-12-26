@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
+use utoipa::ToSchema;
 
 // ============================================================================
 // Identity Types
@@ -20,7 +21,7 @@ pub enum IdentityType {
 }
 
 /// An identity represents a user, agent, or organization in the system
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow, ToSchema)]
 pub struct Identity {
     pub id: Uuid,
     pub identity_type: IdentityType,
@@ -34,7 +35,7 @@ pub struct Identity {
 }
 
 /// Request to create a new identity
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct CreateIdentityRequest {
     pub identity_type: IdentityType,
     pub external_id: Option<String>,
@@ -98,7 +99,7 @@ pub enum CredentialType {
 // ============================================================================
 
 /// A policy definition with Rego source
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow, ToSchema)]
 pub struct Policy {
     pub id: Uuid,
     pub name: String,
@@ -189,7 +190,7 @@ pub enum Decision {
 // ============================================================================
 
 /// An immutable event in the movement ledger
-#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow, ToSchema)]
 pub struct MovementEvent {
     pub id: Uuid,
     pub sequence_number: i64,
@@ -289,14 +290,14 @@ pub enum AnchorStatus {
 // ============================================================================
 
 /// Standard API response wrapper
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ApiResponse<T> {
     pub success: bool,
     pub data: Option<T>,
     pub error: Option<ApiError>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ApiError {
     pub code: String,
     pub message: String,
