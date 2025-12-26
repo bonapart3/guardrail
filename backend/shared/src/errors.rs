@@ -176,7 +176,6 @@ impl GuardRailError {
             Self::Conflict(_) => "RESOURCE_CONFLICT",
             Self::Json(_) => "JSON_ERROR",
         }
-        }
     }
 }
 
