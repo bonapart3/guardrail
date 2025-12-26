@@ -731,6 +731,8 @@ async fn export_events_impl(db: &PgPool, req: ExportRequest) -> Result<ExportRes
     let merkle_root = build_merkle_root(&hashes);
     
     // Create signature over the export
+    let export_id = Uuid::new_v4();
+    let now = chrono::Utc::now();
     
     let first_seq = events.first()
         .map(|e| e.sequence_number)
@@ -753,9 +755,7 @@ async fn export_events_impl(db: &PgPool, req: ExportRequest) -> Result<ExportRes
         export_id,
         event_count: events.len() as i64,
         from_sequence: first_seq,
-        to_sequence: last_seq
-        from_sequence: events.first().unwrap().sequence_number,
-        to_sequence: events.last().unwrap().sequence_number,
+        to_sequence: last_seq,
         merkle_root,
         events,
         signature,
@@ -1001,5 +1001,61 @@ mod tests {
         
         assert_eq!(proof[1].hash, h34);
         assert_eq!(proof[1].position, "right");
+    }
+
+    #[test]
+    fn test_verify_hash_chain() {
+        use chrono::Utc;
+        use guardrail_shared::{EventType, MovementEvent, GENESIS_HASH};
+        use uuid::Uuid;
+        use serde_json::json;
+        
+        let now = Utc::now();
+        let ts1 = now;
+        let ts2 = now + chrono::Duration::seconds(1);
+        let actor_id = Uuid::new_v4();
+        let payload = json!({});
+        
+        let h1 = compute_event_hash(1, &EventType::SystemEvent, &actor_id, &payload, GENESIS_HASH, &ts1);
+        let e1 = MovementEvent {
+            id: Uuid::new_v4(),
+            sequence_number: 1,
+            event_type: EventType::SystemEvent,
+            actor_id,
+            policy_decision_id: None,
+            payload: payload.clone(),
+            previous_hash: GENESIS_HASH.to_string(),
+            event_hash: h1.clone(),
+            anchor_batch_id: None,
+            created_at: ts1,
+        };
+        
+        let h2 = compute_event_hash(2, &EventType::SystemEvent, &actor_id, &payload, &h1, &ts2);
+        let e2 = MovementEvent {
+            id: Uuid::new_v4(),
+            sequence_number: 2,
+            event_type: EventType::SystemEvent,
+            actor_id,
+            policy_decision_id: None,
+            payload: payload.clone(),
+            previous_hash: h1.clone(),
+            event_hash: h2.clone(),
+            anchor_batch_id: None,
+            created_at: ts2,
+        };
+        
+        let events = vec![e1, e2];
+        assert!(verify_hash_chain(&events));
+        
+        // Test broken chain (wrong previous hash)
+        let mut broken_events = events.clone();
+        broken_events[1].previous_hash = "broken".to_string();
+        assert!(!verify_hash_chain(&broken_events));
+
+        // Test broken chain (tampered payload)
+        let mut tampered_events = events.clone();
+        tampered_events[1].payload = json!({"tampered": true});
+        // The hash won't match the payload anymore
+        assert!(!verify_hash_chain(&tampered_events));
     }
 }

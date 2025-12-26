@@ -8,11 +8,11 @@
 
 use axum::{
     body::Body,
-    extract::{Path, Query, State},
+    extract::State,
     http::{header, HeaderMap, Method, Request, StatusCode, Uri},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::{any, delete, get, patch, post},
+    routing::{any, get, post},
     Json, Router,
 };
 use guardrail_shared::{crypto, ApiResponse, GuardRailError, Result};
@@ -794,4 +794,4 @@ async fn main() -> anyhow::Result<()> {
 }
 
 // Need rand for API key generation
-use rand::Rng;
+// use rand::Rng;

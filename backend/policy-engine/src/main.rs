@@ -67,8 +67,8 @@ impl PolicyEngine {
         self.engine.set_input(input.clone().into());
 
         // Query for the decision
-        // Default policy structure expects: data.guardrail.decision
-        let query = "data.guardrail";
+        // Capture the package value in variable 'x'
+        let query = "x = data.guardrail";
         
         let results = self.engine
             .eval_query(query.to_string(), false)
@@ -88,46 +88,39 @@ impl PolicyEngine {
 
         for result in results.result.iter() {
             // Get bindings as object if possible
-            if let Ok(obj) = result.bindings.as_object() {
-                // Check for deny
-                if let Some(deny) = obj.get(&"deny".into()) {
-                    if let Ok(arr) = deny.as_array() {
-                        if !arr.is_empty() {
-                            decision = Decision::Deny;
-                            for reason in arr {
-                                if let Ok(s) = reason.as_string() {
-                                    reasons.push(s.to_string());
+            if let Ok(bindings) = result.bindings.as_object() {
+                // Get the 'x' variable which holds the package value
+                if let Some(pkg_val) = bindings.get(&"x".into()) {
+                    // Convert to serde_json::Value to handle Sets (which become Arrays)
+                    if let Ok(json_val) = serde_json::to_value(pkg_val) {
+                        if let Some(obj) = json_val.as_object() {
+                            // Check for deny
+                            if let Some(deny) = obj.get("deny") {
+                                if let Some(arr) = deny.as_array() {
+                                    if !arr.is_empty() {
+                                        decision = Decision::Deny;
+                                        for reason in arr {
+                                            if let Some(s) = reason.as_str() {
+                                                reasons.push(s.to_string());
+                                            }
+                                        }
+                                    }
+                                } else if deny.as_bool() == Some(true) {
+                                    decision = Decision::Deny;
                                 }
                             }
-                        }
-                    } else if deny.as_bool().ok() == Some(&true) {
-                        decision = Decision::Deny;
-                    }
-                }
 
-                // Check for require_approval
-                if let Some(approval) = obj.get(&"require_approval".into()) {
-                    if let Ok(arr) = approval.as_array() {
-                        if !arr.is_empty() && decision != Decision::Deny {
-                            decision = Decision::RequireApproval;
-                            for approver in arr {
-                                if let Ok(s) = approver.as_string() {
-                                    required_approvers.push(s.to_string());
-                                }
-                            }
-                        }
-                    } else if approval.as_bool().ok() == Some(&true) && decision != Decision::Deny {
-                        decision = Decision::RequireApproval;
-                    }
-                }
-
-                // Check for reasons
-                if let Some(r) = obj.get(&"reasons".into()) {
-                    if let Ok(arr) = r.as_array() {
-                        for reason in arr {
-                            if let Ok(s) = reason.as_string() {
-                                if !reasons.contains(&s.to_string()) {
-                                    reasons.push(s.to_string());
+                            // Check for required_approvers
+                            if let Some(approval) = obj.get("required_approvers") {
+                                if let Some(arr) = approval.as_array() {
+                                    if !arr.is_empty() && decision != Decision::Deny {
+                                        decision = Decision::RequireApproval;
+                                        for approver in arr {
+                                            if let Some(s) = approver.as_str() {
+                                                required_approvers.push(s.to_string());
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
