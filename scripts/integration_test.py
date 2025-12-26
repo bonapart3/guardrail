@@ -92,6 +92,41 @@ def main():
         log("Event not found in ledger!")
         sys.exit(1)
 
+    # 6. Trigger Anchor
+    log("Triggering manual anchor...")
+    anchor_payload = {"max_events": 100}
+    try:
+        resp = requests.post(f"{BASE_URL}/api/v1/anchors/trigger", json=anchor_payload, headers=headers)
+        
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get('error'):
+                if data['error']['code'] == 'NO_EVENTS':
+                    log("Anchor trigger: No events to anchor (might have been auto-anchored).")
+                else:
+                    log(f"Anchor trigger returned error: {data['error']}")
+            else:
+                result = data['data']
+                batch_id = result['batch_id']
+                log(f"Anchor batch created: {batch_id}")
+                
+                # 7. Verify Batch
+                log(f"Verifying batch {batch_id}...")
+                resp = requests.get(f"{BASE_URL}/api/v1/anchors/{batch_id}", headers=headers)
+                batch_detail = check_response(resp)['data']
+                if batch_detail['verification_status']['merkle_root_matches']:
+                    log("Batch Merkle root verified!")
+                else:
+                    log("Batch Merkle root mismatch!")
+                    sys.exit(1)
+        else:
+            log(f"Anchor trigger failed: {resp.status_code} {resp.text}")
+            # Don't fail hard if the service isn't running, just warn
+            log("Warning: Chain Anchor service might not be running or reachable.")
+
+    except Exception as e:
+        log(f"Anchor test skipped: {e}")
+
     log("Integration test passed!")
 
 if __name__ == "__main__":

@@ -27,6 +27,8 @@ use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use uuid::Uuid;
+use utoipa::{OpenApi, ToSchema};
+use utoipa_swagger_ui::SwaggerUi;
 
 // ============================================================================
 // Application State
@@ -80,34 +82,34 @@ pub enum AuthMethod {
     ApiKey,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct LoginResponse {
     pub token: String,
     pub expires_at: chrono::DateTime<chrono::Utc>,
     pub user: UserInfo,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct UserInfo {
     pub id: Uuid,
     pub email: String,
     pub role: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateApiKeyRequest {
     pub name: String,
     pub scopes: Vec<String>,
     pub expires_in_days: Option<i64>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct CreateApiKeyResponse {
     pub id: Uuid,
     pub name: String,
@@ -135,6 +137,13 @@ pub struct ServiceHealth {
     pub latency_ms: u64,
 }
 
+#[utoipa::path(
+    get,
+    path = "/health",
+    responses(
+        (status = 200, description = "Service is healthy")
+    )
+)]
 async fn health(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut services = HashMap::new();
     
@@ -174,6 +183,15 @@ async fn health(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 // Authentication Handlers
 // ============================================================================
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/auth/login",
+    request_body = LoginRequest,
+    responses(
+        (status = 200, description = "Login successful", body = LoginResponse),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 async fn login(
     State(state): State<Arc<AppState>>,
     Json(req): Json<LoginRequest>,
@@ -643,9 +661,25 @@ async fn handle_anchor(
 // Router
 // ============================================================================
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        health,
+        login,
+    ),
+    components(
+        schemas(LoginRequest, LoginResponse, UserInfo, CreateApiKeyRequest, CreateApiKeyResponse)
+    ),
+    tags(
+        (name = "guardrail", description = "GuardRail API Gateway")
+    )
+)]
+struct ApiDoc;
+
 fn create_router(state: Arc<AppState>) -> Router {
     // Public routes (no auth required)
     let public_routes = Router::new()
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(health))
         .route("/api/v1/auth/login", post(login));
     
