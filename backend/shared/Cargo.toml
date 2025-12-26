@@ -15,12 +15,11 @@ hex = "0.4"
 utoipa = { version = "4.2", features = ["uuid", "chrono"] }
 
 # ZK Dependencies
-# Temporarily disabled to resolve dependency hell with Solana SDK
-# ark-bls12-381 = "0.3.0"
-# ark-groth16 = "0.3.0"
-# ark-snark = "0.3.0"
-# ark-std = "0.3.0"
-# ark-ff = "0.3.0"
-# ark-serialize = "0.3.0"
-# ark-relations = "0.3.0"
-# rand = "0.8"
+ark-bls12-381 = "0.4.0"
+ark-groth16 = "0.4.0"
+ark-snark = "0.4.0"
+ark-std = "0.4.0"
+ark-ff = "0.4.0"
+ark-serialize = "0.4.0"
+ark-relations = "0.4.0"
+rand = "0.8"

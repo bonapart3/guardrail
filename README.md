@@ -108,7 +108,7 @@ cd ../frontend && npm install && npm run dev
 
 ### Default Credentials
 
-- **Email**: admin@guardrail.dev
+- **Email**: <admin@guardrail.dev>
 - **Password**: admin123
 
 ## 📁 Project Structure
@@ -166,6 +166,7 @@ Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,

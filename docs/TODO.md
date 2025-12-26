@@ -180,13 +180,13 @@ All core components implemented. Ready for testing and deployment.
 ### Documentation
 
 - [x] OpenAPI spec generation
-- [ ] SDK README and examples
-- [ ] Deployment guide
+- [x] SDK README and examples
+- [x] Deployment guide
 
 ### Testing
 
-- [ ] E2E tests for frontend
-- [ ] Contract tests (Foundry, Anchor)
+- [x] E2E tests for frontend
+- [x] Contract tests (Foundry, Anchor)
 
 ---
 

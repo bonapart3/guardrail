@@ -3,9 +3,11 @@
 ## 2025-12-25 - Production Hardening Complete 🔒
 
 ### Summary
+
 Completed comprehensive production hardening: eliminated all remaining `.unwrap()` calls from runtime code, fixed manual code patterns, improved error handling, and verified system stability. All tests pass, clippy warnings resolved.
 
 ### Changes Made
+
 - **API Gateway**: Replaced 6 `.unwrap()` calls with `.expect()` in error response building and JWT timestamp handling
 - **Crypto Utilities**: Fixed manual `% 2 == 0` checks with `is_multiple_of(2)` for better readability
 - **Authentication**: Improved Bearer token parsing using `strip_prefix` instead of manual slicing
@@ -14,26 +16,94 @@ Completed comprehensive production hardening: eliminated all remaining `.unwrap(
 - **Hash Generator**: CLI-based password input for security
 - **Verification**: Confirmed all services have graceful shutdown and JSON logging enabled
 
-### Files Modified
-- `/backend/api-gateway/src/main.rs` - Error response building fixes
-- `/backend/shared/src/crypto.rs` - Safe Merkle tree operations and code improvements
-- `/backend/shared/src/zk_credential.rs` - Result-based crypto functions
-- `/backend/hash-gen/src/main.rs` - CLI password input
-- `/backend/chain-anchor/src/main.rs` - Safe padding logic
-- `/backend/movement-ledger/src/main.rs` - Code improvements
+---
+
+## 2025-12-25 - SDK Documentation Complete 📚
+
+### Summary
+
+Created comprehensive README documentation for both TypeScript and Python SDKs with installation instructions, usage examples, authentication setup, and API reference.
+
+### Changes Made
+
+- **TypeScript SDK README**: Added installation, quick start, core methods (policy evaluation, identity management, audit events), error handling, configuration, and examples for AI agent compliance and multi-asset withdrawals
+- **Python SDK README**: Added installation, quick start, core methods with async support, error handling, type hints, and examples including batch policy checks
+
+### Files Created
+
+- `/sdk/typescript/README.md` - Complete TypeScript SDK documentation
+- `/sdk/python/README.md` - Complete Python SDK documentation
 
 ---
 
-## 2025-12-25 - MVP COMPLETE 🎉
+## 2025-12-25 - Deployment Guide Complete 🚀
 
 ### Summary
-Full MVP implementation complete. All core services, frontend console, smart contracts, SDKs, and CI/CD pipeline implemented.
+
+Created comprehensive deployment documentation covering Fly.io backend deployment, Vercel frontend deployment, environment configuration, staging setup, monitoring, security, and maintenance procedures.
+
+### Changes Made
+
+- **Backend Deployment**: Detailed Fly.io setup for all 5 services with configuration examples
+- **Frontend Deployment**: Vercel deployment process with environment variables
+- **Database Setup**: Supabase configuration and migration steps
+- **Smart Contracts**: Foundry and Anchor deployment procedures
+- **Staging Environment**: Complete staging setup checklist and procedures
+- **Monitoring & Security**: Health checks, logging, security considerations
+- **Maintenance**: Backup strategies, rollback procedures, troubleshooting
+
+### Files Created
+
+- `/docs/DEPLOYMENT.md` - Complete deployment and operations guide
+
+---
+
+## 2025-12-25 - E2E Frontend Tests Complete 🧪
+
+### Summary
+
+Implemented comprehensive Playwright E2E tests for Next.js frontend covering dashboard navigation, identity management, policy simulation, and audit event viewing.
+
+### Changes Made
+
+- **Playwright Setup**: Installed @playwright/test, configured playwright.config.ts with local dev server, added test scripts to package.json
+- **Dashboard Tests**: Navigation between pages, metrics display verification
+- **Identity Tests**: CRUD operations, key attachment, form validation
+- **Policy Tests**: Policy creation with Monaco editor, simulation testing, Rego code validation
+- **Event Tests**: Audit log filtering, event details, cryptographic proof viewing
+
+### Files Created
+
+- `/frontend/playwright.config.ts` - Playwright configuration
+- `/frontend/tests/dashboard.spec.ts` - Dashboard navigation tests
+- `/frontend/tests/identities.spec.ts` - Identity management tests
+- `/frontend/tests/policies.spec.ts` - Policy builder and simulation tests
+- `/frontend/tests/events.spec.ts` - Audit ledger tests
+
+---
+
+## 2025-12-25 - Contract Tests Complete 🧪
+
+### Summary
+
+Implemented comprehensive contract tests for both Ethereum (Foundry) and Solana (Anchor) smart contracts covering batch anchoring, verification, authorization, and security features.
+
+### Changes Made
+
+- **Ethereum Tests**: Foundry test suite with unit tests, fuzzing, and edge cases for GuardRailAnchor.sol including batch storage, verification, authorization, cooldowns, and pause functionality
+- **Solana Tests**: Anchor TypeScript test suite covering program initialization, batch anchoring, verification, anchor authorization/revocation, and pause/unpause functionality
+
+### Files Created
+
+- `/contracts/ethereum/test/GuardRailAnchor.t.sol` - Foundry test suite
+- `/contracts/solana/tests/guardrail-anchor.ts` - Anchor test suite
 
 ---
 
 ## Session 1: Foundation Setup
 
-### Completed
+### Session 1: Completed
+
 - Created comprehensive project plan and architecture docs
 - Set up Rust Cargo workspace with all backend services
 - Implemented shared types crate with:
@@ -50,6 +120,7 @@ Full MVP implementation complete. All core services, frontend console, smart con
 - Set up Docker Compose for local development
 
 ### Files Created
+
 - `/docs/PLAN.md` - Full requirements and stack
 - `/docs/ARCHITECTURE.md` - System design
 - `/docs/TODO.md` - Task queue
@@ -58,11 +129,14 @@ Full MVP implementation complete. All core services, frontend console, smart con
 - `/scripts/init.sql` - Complete database schema
 - `/infrastructure/docker-compose.yml` - Dev environment
 
----
+### Files Created
+
+- `/docs/PLAN.md` - Full requirements and stack
 
 ## Session 2: Core Services
 
-### Completed
+### Session 2: Completed
+
 - **Identity Service** (Rust/Axum):
   - Full CRUD for identities
   - Key attachment/detachment
@@ -83,15 +157,18 @@ Full MVP implementation complete. All core services, frontend console, smart con
   - `agent_trading.rego` - agent limits, strategy whitelists, co-signature
 
 ### Files Created
+
 - `/backend/identity-service/` - Full implementation
 - `/backend/policy-engine/` - Full implementation
 - `/backend/policy-engine/policies/` - Sample policies
-
----
+- **Sample Rego Policies**:
+  - `default_withdrawal.rego` - KYC-tiered limits, sanctions, approvals
+  - `agent_trading.rego` - agent limits, strategy whitelists, co-signature
 
 ## Session 3: Event Sourcing & Blockchain
 
-### Completed
+### Session 3: Completed
+
 - **Movement Ledger** (Rust/Axum):
   - Event sourcing infrastructure
   - Hash-chaining for tamper-evidence
@@ -112,14 +189,17 @@ Full MVP implementation complete. All core services, frontend console, smart con
   - Stats and monitoring endpoints
 
 ### Files Created
+
 - `/backend/movement-ledger/` - Full implementation
 - `/backend/chain-anchor/` - Full implementation
-
----
+  - Scheduled anchoring job
+  - Manual trigger endpoint
+  - Retry mechanism for failed batches
 
 ## Session 4: API Gateway & Frontend
 
-### Completed
+### Session 4: Completed
+
 - **API Gateway** (Rust/Axum):
   - JWT authentication middleware
   - API key authentication middleware
@@ -136,14 +216,17 @@ Full MVP implementation complete. All core services, frontend console, smart con
   - Full API client integration
 
 ### Files Created
+
 - `/backend/api-gateway/` - Full implementation
 - `/frontend/` - Complete Next.js app
-
----
+  - Policy builder with Monaco editor
+  - Audit log viewer
+  - Settings pages
 
 ## Session 5: Smart Contracts & SDKs
 
-### Completed
+### Session 5: Completed
+
 - **Ethereum Contract** (`GuardRailAnchor.sol`):
   - Batch storage with Merkle roots
   - Authorized anchors management
@@ -170,16 +253,18 @@ Full MVP implementation complete. All core services, frontend console, smart con
   - Error handling
 
 ### Files Created
+
 - `/contracts/ethereum/GuardRailAnchor.sol`
 - `/contracts/solana/programs/guardrail/`
 - `/sdk/typescript/`
 - `/sdk/python/`
-
----
+  - Type hints throughout
+  - Error handling
 
 ## Session 6: DevOps & Polish
 
-### Completed
+### Session 6: Completed
+
 - CI/CD pipeline (GitHub Actions):
   - Backend lint, format, test, build
   - Frontend lint, typecheck, build
@@ -194,6 +279,16 @@ Full MVP implementation complete. All core services, frontend console, smart con
   - Updated README with quick start
 
 ### Files Created
+
+- `/.github/workflows/ci.yml`
+- `/.github/workflows/deploy.yml`
+- `/scripts/start.sh`
+- `/scripts/stop.sh`
+- `/scripts/logs.sh`
+  - Updated README with quick start
+
+### Files Created
+
 - `/.github/workflows/ci.yml`
 - `/.github/workflows/deploy.yml`
 - `/scripts/start.sh`
