@@ -36,7 +36,13 @@
       "Bash(taskkill:*)",
       "Bash(tasklist /FI \"PID eq 33256\")",
       "Bash(tasklist /FI \"PID eq 35440\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(docker system:*)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(cargo run:*)",
+      "Bash(docker restart:*)"
     ]
   }
 }
