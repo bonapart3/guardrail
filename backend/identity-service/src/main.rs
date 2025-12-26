@@ -100,11 +100,11 @@ async fn create_identity_impl(db: &PgPool, req: CreateIdentityRequest) -> Result
         Identity,
         r#"
         INSERT INTO identities (id, identity_type, external_id, display_name, metadata, organization_id, is_active, created_at, updated_at)
-        VALUES ($1, $2::identity_type, $3, $4, $5, $6, true, $7, $7)
-        RETURNING id, identity_type as "identity_type: _", external_id, display_name, metadata, organization_id, is_active, created_at, updated_at
+        VALUES ($1, $2, $3, $4, $5, $6, true, $7, $7)
+        RETURNING id, identity_type as "identity_type: IdentityType", external_id, display_name, metadata, organization_id, is_active, created_at, updated_at
         "#,
         id,
-        req.identity_type.to_string(),
+        req.identity_type as IdentityType,
         req.external_id,
         req.display_name,
         metadata,
