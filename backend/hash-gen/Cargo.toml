@@ -1,0 +1,10 @@
+[package]
+name = "hash-gen"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+argon2 = { version = "0.5", features = ["password-hash"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
