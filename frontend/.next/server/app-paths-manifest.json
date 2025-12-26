@@ -1,9 +1,1 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
-  "/(dashboard)/identities/page": "app/(dashboard)/identities/page.js",
-  "/(dashboard)/policies/page": "app/(dashboard)/policies/page.js",
-  "/(dashboard)/approvals/page": "app/(dashboard)/approvals/page.js",
-  "/(dashboard)/settings/page": "app/(dashboard)/settings/page.js",
-  "/(dashboard)/page": "app/(dashboard)/page.js"
-}
+{}

@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST='{"app\\\\(dashboard)\\\\policies\\\\page.tsx -> @monaco-editor/react":{"id":7270,"files":["static/chunks/270.59c43b6d4dd259ae.js"]}}';
+self.__REACT_LOADABLE_MANIFEST="{}"
