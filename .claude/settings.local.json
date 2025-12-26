@@ -26,7 +26,9 @@
       "Bash(DATABASE_URL=\"postgres://guardrail:guardrail_dev@localhost:5432/guardrail\" cargo check:*)",
       "Bash(cargo update:*)",
       "Bash(npm install:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)"
     ]
   }
 }
