@@ -688,6 +688,31 @@ fn create_router(state: Arc<AppState>) -> Router {
 // Main
 // ============================================================================
 
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    tracing::info!("signal received, starting graceful shutdown");
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
@@ -696,7 +721,7 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "api_gateway=debug,tower_http=debug".into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().json())
         .init();
 
     // Load environment variables
@@ -716,7 +741,7 @@ async fn main() -> anyhow::Result<()> {
     // Load config
     let config = GatewayConfig {
         jwt_secret: std::env::var("JWT_SECRET")
-            .unwrap_or_else(|_| "dev_secret_change_in_production".to_string()),
+            .expect("JWT_SECRET must be set"),
         jwt_expiry_hours: std::env::var("JWT_EXPIRY_HOURS")
             .ok()
             .and_then(|s| s.parse().ok())
@@ -761,7 +786,9 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("API Gateway listening on {}", addr);
     
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
 
     Ok(())
 }

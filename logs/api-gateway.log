@@ -48,3 +48,28 @@ error: unexpected closing delimiter: `}`
     | ^ unexpected closing delimiter
 
 error: could not compile `guardrail-shared` (lib) due to 1 previous error
+   Compiling api-gateway v0.1.0 (C:\Users\tyler\Downloads\guardrail-complete\guardrail\backend\api-gateway)
+warning: unused imports: `Path`, `Query`, `delete`, and `patch`
+  --> api-gateway\src\main.rs:11:15
+   |
+11 |     extract::{Path, Query, State},
+   |               ^^^^  ^^^^^
+...
+15 |     routing::{any, delete, get, patch, post},
+   |                    ^^^^^^       ^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `rand::Rng`
+   --> api-gateway\src\main.rs:770:5
+    |
+770 | use rand::Rng;
+    |     ^^^^^^^^^
+
+warning: `api-gateway` (bin "api-gateway") generated 2 warnings (run `cargo fix --bin "api-gateway"` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 08s
+     Running `target\release\api-gateway.exe`
+[2m2025-12-26T03:54:30.045869Z[0m [32m INFO[0m [2mapi_gateway[0m[2m:[0m Connected to database
+[2m2025-12-26T03:54:30.047633Z[0m [32m INFO[0m [2mapi_gateway[0m[2m:[0m API Gateway listening on 0.0.0.0:3000
+Error: Only one usage of each socket address (protocol/network address/port) is normally permitted. (os error 10048)
+error: process didn't exit successfully: `target\release\api-gateway.exe` (exit code: 1)

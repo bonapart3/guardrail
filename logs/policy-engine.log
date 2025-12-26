@@ -47,3 +47,11 @@ error: unexpected closing delimiter: `}`
     | ^ unexpected closing delimiter
 
 error: could not compile `guardrail-shared` (lib) due to 1 previous error
+    Blocking waiting for file lock on build directory
+    Finished `release` profile [optimized] target(s) in 18.64s
+     Running `target\release\policy-engine.exe`
+[2m2025-12-26T03:53:16.798163Z[0m [32m INFO[0m [2mpolicy_engine[0m[2m:[0m Connected to database
+[2m2025-12-26T03:53:16.881460Z[0m [32m INFO[0m [2mpolicy_engine[0m[2m:[0m Loaded active policies
+[2m2025-12-26T03:53:16.881886Z[0m [32m INFO[0m [2mpolicy_engine[0m[2m:[0m Policy Engine listening on 0.0.0.0:3002
+Error: Only one usage of each socket address (protocol/network address/port) is normally permitted. (os error 10048)
+error: process didn't exit successfully: `target\release\policy-engine.exe` (exit code: 1)

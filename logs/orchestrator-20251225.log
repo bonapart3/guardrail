@@ -253,3 +253,47 @@ unable to get image 'redis:7-alpine': error during connect: Get "http://%2F%2F.%
 [2025-12-25 16:14:07.232] WARNING [chain-anchor] Health check failed (2/3)
 [2025-12-25 16:14:21.455] WARNING [chain-anchor] Health check failed (3/3)
 [2025-12-25 16:14:21.532] ERROR [chain-anchor] Max restart attempts reached
+[2025-12-25 21:52:43.285] INFO  [orchestrator] ==================================================
+[2025-12-25 21:52:43.585] INFO  [orchestrator] Starting GuardRail Platform
+[2025-12-25 21:52:43.827] INFO  [orchestrator] ==================================================
+[2025-12-25 21:52:44.252] INFO  [orchestrator] Checking system dependencies...
+[2025-12-25 21:52:45.176] INFO  [orchestrator] [OK] Docker: Docker version 29.1.3, build f52814d
+[2025-12-25 21:52:47.393] INFO  [orchestrator] [OK] Docker Compose: Docker Compose version v2.40.3-desktop.1
+[2025-12-25 21:52:47.869] INFO  [orchestrator] [OK] Rust: rustc 1.91.1 (ed61e7d7e 2025-11-07)
+[2025-12-25 21:52:48.235] INFO  [orchestrator] [OK] Cargo: cargo 1.91.1 (ea2d97820 2025-10-10)
+[2025-12-25 21:52:48.616] INFO  [orchestrator] [OK] Node.js: v24.12.0
+[2025-12-25 21:52:50.220] INFO  [orchestrator] [OK] npm: 11.7.0
+[2025-12-25 21:52:50.307] INFO  [orchestrator] Starting infrastructure (PostgreSQL, Redis)...
+[2025-12-25 21:52:50.410] INFO  [orchestrator] [OK] PostgreSQL already running on port 5432
+[2025-12-25 21:52:50.517] INFO  [orchestrator] [OK] Redis already running on port 6379
+[2025-12-25 21:52:50.627] INFO  [identity-service] Starting service...
+[2025-12-25 21:52:50.735] INFO  [identity-service] Started with PID 41380
+[2025-12-25 21:52:53.998] INFO  [identity-service] [OK] Service is running
+[2025-12-25 21:52:57.104] INFO  [policy-engine] Starting service...
+[2025-12-25 21:52:57.486] INFO  [policy-engine] Started with PID 35624
+[2025-12-25 21:53:01.078] INFO  [policy-engine] [OK] Service is running
+[2025-12-25 21:53:04.384] INFO  [movement-ledger] Starting service...
+[2025-12-25 21:53:04.582] INFO  [movement-ledger] Started with PID 13132
+[2025-12-25 21:53:07.731] INFO  [movement-ledger] [OK] Service is running
+[2025-12-25 21:53:10.985] INFO  [chain-anchor] Starting service...
+[2025-12-25 21:53:11.149] INFO  [chain-anchor] Started with PID 35164
+[2025-12-25 21:53:14.300] ERROR [chain-anchor] Process exited immediately with code 101
+[2025-12-25 21:53:14.552] ERROR [chain-anchor]   help: available bin targets:
+[2025-12-25 21:53:14.672] ERROR [chain-anchor]       api-gateway
+[2025-12-25 21:53:14.783] ERROR [chain-anchor]       identity-service
+[2025-12-25 21:53:14.929] ERROR [chain-anchor]       movement-ledger
+[2025-12-25 21:53:15.034] ERROR [chain-anchor]       policy-engine
+[2025-12-25 21:53:15.144] ERROR [orchestrator] Failed to start chain-anchor
+[2025-12-25 21:53:15.244] INFO  [orchestrator] Continuing with remaining services...
+[2025-12-25 21:53:18.341] INFO  [api-gateway] Starting service...
+[2025-12-25 21:53:18.571] INFO  [api-gateway] Started with PID 24760
+[2025-12-25 21:53:21.841] INFO  [api-gateway] [OK] Service is running
+[2025-12-25 21:53:24.955] INFO  [frontend] Starting service...
+[2025-12-25 21:53:25.902] INFO  [frontend] Started with PID 17516
+[2025-12-25 21:53:29.036] INFO  [frontend] [OK] Service is running
+[2025-12-25 21:53:32.169] INFO  [orchestrator] ==================================================
+[2025-12-25 21:53:32.423] INFO  [orchestrator] GuardRail Platform Started (5/6 services)
+[2025-12-25 21:53:32.566] INFO  [orchestrator] 
+[2025-12-25 21:53:32.630] INFO  [orchestrator]   API Gateway:  http://localhost:3000
+[2025-12-25 21:53:32.828] INFO  [orchestrator]   Console:      http://localhost:3010
+[2025-12-25 21:53:32.925] INFO  [orchestrator] ==================================================

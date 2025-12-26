@@ -585,6 +585,31 @@ fn create_router(state: Arc<AppState>) -> Router {
 // Main
 // ============================================================================
 
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    tracing::info!("signal received, starting graceful shutdown");
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
@@ -593,7 +618,7 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "policy_engine=debug,tower_http=debug".into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().json())
         .init();
 
     // Load environment variables
@@ -630,7 +655,117 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("Policy Engine listening on {}", addr);
     
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_policy_engine_default_allow() {
+        let mut engine = PolicyEngine::new();
+        let rego = r#"
+            package guardrail
+            default decision = "ALLOW"
+        "#;
+        engine.load_policy(Uuid::new_v4(), "test", rego).unwrap();
+        
+        let input = json!({});
+        let result = engine.evaluate(&input).unwrap();
+        assert_eq!(result.decision, Decision::Allow);
+    }
+
+    #[test]
+    fn test_policy_engine_deny_condition() {
+        let mut engine = PolicyEngine::new();
+        let rego = r#"
+            package guardrail
+            default decision = "ALLOW"
+            deny["Amount too high"] {
+                input.amount > 1000
+            }
+        "#;
+        engine.load_policy(Uuid::new_v4(), "test", rego).unwrap();
+        
+        let input = json!({"amount": 1500});
+        let result = engine.evaluate(&input).unwrap();
+        assert_eq!(result.decision, Decision::Deny);
+        assert!(result.reasons.contains(&"Amount too high".to_string()));
+    }
+
+    #[test]
+    fn test_policy_engine_allow_condition() {
+        let mut engine = PolicyEngine::new();
+        let rego = r#"
+            package guardrail
+            default decision = "ALLOW"
+            deny["Amount too high"] {
+                input.amount > 1000
+            }
+        "#;
+        engine.load_policy(Uuid::new_v4(), "test", rego).unwrap();
+        
+        let input = json!({"amount": 500});
+        let result = engine.evaluate(&input).unwrap();
+        assert_eq!(result.decision, Decision::Allow);
+        assert!(result.reasons.is_empty());
+    }
+
+    #[test]
+    fn test_multiple_policies() {
+        let mut engine = PolicyEngine::new();
+        let rego1 = r#"
+            package guardrail
+            deny["Rule 1"] { input.x > 10 }
+        "#;
+        let rego2 = r#"
+            package guardrail
+            deny["Rule 2"] { input.y > 10 }
+        "#;
+        
+        engine.load_policy(Uuid::new_v4(), "p1", rego1).unwrap();
+        engine.load_policy(Uuid::new_v4(), "p2", rego2).unwrap();
+        
+        let input = json!({"x": 15, "y": 5});
+        let result = engine.evaluate(&input).unwrap();
+        assert_eq!(result.decision, Decision::Deny);
+        assert!(result.reasons.contains(&"Rule 1".to_string()));
+        assert!(!result.reasons.contains(&"Rule 2".to_string()));
+        
+        let input = json!({"x": 5, "y": 15});
+        let result = engine.evaluate(&input).unwrap();
+        assert_eq!(result.decision, Decision::Deny);
+        assert!(!result.reasons.contains(&"Rule 1".to_string()));
+        assert!(result.reasons.contains(&"Rule 2".to_string()));
+        
+        let input = json!({"x": 15, "y": 15});
+        let result = engine.evaluate(&input).unwrap();
+        assert_eq!(result.decision, Decision::Deny);
+        assert!(result.reasons.contains(&"Rule 1".to_string()));
+        assert!(result.reasons.contains(&"Rule 2".to_string()));
+    }
+
+    #[test]
+    fn test_require_approval() {
+        let mut engine = PolicyEngine::new();
+        let rego = r#"
+            package guardrail
+            default decision = "ALLOW"
+            required_approvers["admin"] {
+                input.amount > 5000
+            }
+        "#;
+        engine.load_policy(Uuid::new_v4(), "test", rego).unwrap();
+        
+        let input = json!({"amount": 6000});
+        let result = engine.evaluate(&input).unwrap();
+        assert_eq!(result.decision, Decision::RequireApproval);
+        assert!(result.required_approvers.contains(&"admin".to_string()));
+    }
 }

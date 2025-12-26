@@ -57,6 +57,13 @@ guardrail/
 └── infrastructure/          # Docker, deployment configs
 ```
 
+## Security & Deployment
+
+- **Container Security**: All services run as non-privileged `guardrail` user.
+- **Secrets Management**: Secrets are injected via environment variables (no hardcoded credentials).
+- **Graceful Shutdown**: Services handle SIGTERM for safe termination.
+- **Health Checks**: All services expose `/health` endpoint.
+
 ## API Design
 
 ### Core Endpoints

@@ -435,6 +435,31 @@ fn create_router(state: Arc<AppState>) -> Router {
 // Main
 // ============================================================================
 
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    tracing::info!("signal received, starting graceful shutdown");
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
@@ -443,7 +468,7 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "identity_service=debug,tower_http=debug".into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().json())
         .init();
 
     // Load environment variables
@@ -473,7 +498,9 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("Identity Service listening on {}", addr);
     
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
 
     Ok(())
 }

@@ -109,3 +109,9 @@ error: unexpected closing delimiter: `}`
 
 error: could not compile `guardrail-shared` (lib) due to 1 previous error
 warning: build failed, waiting for other jobs to finish...
+error: no bin target named `chain-anchor` in default-run packages
+help: available bin targets:
+    api-gateway
+    identity-service
+    movement-ledger
+    policy-engine

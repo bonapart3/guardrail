@@ -48,3 +48,9 @@ error: unexpected closing delimiter: `}`
     | ^ unexpected closing delimiter
 
 error: could not compile `guardrail-shared` (lib) due to 1 previous error
+    Finished `release` profile [optimized] target(s) in 19.12s
+     Running `target\release\identity-service.exe`
+[2m2025-12-26T03:53:10.518092Z[0m [32m INFO[0m [2midentity_service[0m[2m:[0m Connected to database
+[2m2025-12-26T03:53:10.518584Z[0m [32m INFO[0m [2midentity_service[0m[2m:[0m Identity Service listening on 0.0.0.0:3001
+Error: Only one usage of each socket address (protocol/network address/port) is normally permitted. (os error 10048)
+error: process didn't exit successfully: `target\release\identity-service.exe` (exit code: 1)

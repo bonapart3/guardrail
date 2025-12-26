@@ -201,7 +201,9 @@ pub fn build_merkle_root(event_hashes: &[String]) -> String {
     
     // Pad to power of 2 if needed
     while current_level.len() & (current_level.len() - 1) != 0 {
-        current_level.push(current_level.last().unwrap().clone());
+        if let Some(last) = current_level.last() {
+            current_level.push(last.clone());
+        }
     }
     
     while current_level.len() > 1 {
@@ -232,7 +234,9 @@ pub fn generate_merkle_proof(event_hashes: &[String], target_index: usize) -> Ve
     
     // Pad to power of 2
     while current_level.len() & (current_level.len() - 1) != 0 {
-        current_level.push(current_level.last().unwrap().clone());
+        if let Some(last) = current_level.last() {
+            current_level.push(last.clone());
+        }
     }
     
     while current_level.len() > 1 {
@@ -727,20 +731,29 @@ async fn export_events_impl(db: &PgPool, req: ExportRequest) -> Result<ExportRes
     let merkle_root = build_merkle_root(&hashes);
     
     // Create signature over the export
-    let export_id = Uuid::new_v4();
-    let now = chrono::Utc::now();
+    
+    let first_seq = events.first()
+        .map(|e| e.sequence_number)
+        .ok_or_else(|| GuardRailError::Internal("Events list empty".to_string()))?;
+        
+    let last_seq = events.last()
+        .map(|e| e.sequence_number)
+        .ok_or_else(|| GuardRailError::Internal("Events list empty".to_string()))?;
+
     let signature_data = format!(
         "{}:{}:{}:{}",
         export_id,
         merkle_root,
-        events.first().unwrap().sequence_number,
-        events.last().unwrap().sequence_number
+        first_seq,
+        last_seq
     );
     let signature = crypto::sha256_hex(signature_data.as_bytes());
     
     Ok(ExportResponse {
         export_id,
         event_count: events.len() as i64,
+        from_sequence: first_seq,
+        to_sequence: last_seq
         from_sequence: events.first().unwrap().sequence_number,
         to_sequence: events.last().unwrap().sequence_number,
         merkle_root,
@@ -811,6 +824,31 @@ fn create_router(state: Arc<AppState>) -> Router {
 // Main
 // ============================================================================
 
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    tracing::info!("signal received, starting graceful shutdown");
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
@@ -819,7 +857,7 @@ async fn main() -> anyhow::Result<()> {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "movement_ledger=debug,tower_http=debug".into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().json())
         .init();
 
     // Load environment variables
@@ -870,7 +908,98 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("Movement Ledger listening on {}", addr);
     
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_build_merkle_root_empty() {
+        let hashes = vec![];
+        let root = build_merkle_root(&hashes);
+        assert_eq!(root, "0".repeat(64));
+    }
+
+    #[test]
+    fn test_build_merkle_root_single() {
+        let hash = "a".repeat(64);
+        let hashes = vec![hash.clone()];
+        let root = build_merkle_root(&hashes);
+        assert_eq!(root, hash);
+    }
+
+    #[test]
+    fn test_build_merkle_root_pair() {
+        let h1 = "a".repeat(64);
+        let h2 = "b".repeat(64);
+        let hashes = vec![h1.clone(), h2.clone()];
+        
+        let mut hasher = Sha256::new();
+        hasher.update(&h1);
+        hasher.update(&h2);
+        let expected = hex::encode(hasher.finalize());
+        
+        let root = build_merkle_root(&hashes);
+        assert_eq!(root, expected);
+    }
+
+    #[test]
+    fn test_build_merkle_root_odd() {
+        let h1 = "a".repeat(64);
+        let h2 = "b".repeat(64);
+        let h3 = "c".repeat(64);
+        let hashes = vec![h1.clone(), h2.clone(), h3.clone()];
+        
+        // Level 1: h1+h2, h3+h3
+        let mut hasher = Sha256::new();
+        hasher.update(&h1);
+        hasher.update(&h2);
+        let l1_1 = hex::encode(hasher.finalize());
+        
+        let mut hasher = Sha256::new();
+        hasher.update(&h3);
+        hasher.update(&h3);
+        let l1_2 = hex::encode(hasher.finalize());
+        
+        // Root: l1_1 + l1_2
+        let mut hasher = Sha256::new();
+        hasher.update(&l1_1);
+        hasher.update(&l1_2);
+        let expected = hex::encode(hasher.finalize());
+        
+        let root = build_merkle_root(&hashes);
+        assert_eq!(root, expected);
+    }
+
+    #[test]
+    fn test_generate_merkle_proof() {
+        let h1 = "a".repeat(64);
+        let h2 = "b".repeat(64);
+        let h3 = "c".repeat(64);
+        let h4 = "d".repeat(64);
+        let hashes = vec![h1.clone(), h2.clone(), h3.clone(), h4.clone()];
+        
+        // Proof for h1 (index 0)
+        // Sibling 1: h2 (right)
+        // Sibling 2: hash(h3+h4) (right)
+        
+        let proof = generate_merkle_proof(&hashes, 0);
+        assert_eq!(proof.len(), 2);
+        assert_eq!(proof[0].hash, h2);
+        assert_eq!(proof[0].position, "right");
+        
+        let mut hasher = Sha256::new();
+        hasher.update(&h3);
+        hasher.update(&h4);
+        let h34 = hex::encode(hasher.finalize());
+        
+        assert_eq!(proof[1].hash, h34);
+        assert_eq!(proof[1].position, "right");
+    }
 }

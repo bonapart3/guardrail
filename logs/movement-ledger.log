@@ -32,3 +32,20 @@ error: unexpected closing delimiter: `}`
     | ^ unexpected closing delimiter
 
 error: could not compile `guardrail-shared` (lib) due to 1 previous error
+    Blocking waiting for file lock on build directory
+warning: function `verify_hash_chain` is never used
+   --> movement-ledger\src\main.rs:159:4
+    |
+159 | fn verify_hash_chain(events: &[MovementEvent]) -> bool {
+    |    ^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `movement-ledger` (bin "movement-ledger") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 12.17s
+     Running `target\release\movement-ledger.exe`
+[2m2025-12-26T03:53:17.159534Z[0m [32m INFO[0m [2mmovement_ledger[0m[2m:[0m Connected to database
+[2m2025-12-26T03:53:17.190490Z[0m [32m INFO[0m [2mmovement_ledger[0m[2m:[0m Last event sequence: None
+[2m2025-12-26T03:53:17.191027Z[0m [32m INFO[0m [2mmovement_ledger[0m[2m:[0m Movement Ledger listening on 0.0.0.0:3003
+Error: Only one usage of each socket address (protocol/network address/port) is normally permitted. (os error 10048)
+error: process didn't exit successfully: `target\release\movement-ledger.exe` (exit code: 1)

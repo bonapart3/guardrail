@@ -193,9 +193,15 @@ class OrchestratorLogger:
 # ============================================================================
 
 def get_default_services() -> List[ServiceConfig]:
+    # Load from environment or use defaults
+    db_url = os.getenv("DATABASE_URL", "postgresql://guardrail:guardrail_dev@localhost:5432/guardrail")
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    jwt_secret = os.getenv("JWT_SECRET", "dev_secret_change_in_production")
+    
     base_env = {
-        "DATABASE_URL": "postgresql://guardrail:guardrail_dev@localhost:5432/guardrail",
-        "REDIS_URL": "redis://localhost:6379",
+        "DATABASE_URL": db_url,
+        "REDIS_URL": redis_url,
+        "JWT_SECRET": jwt_secret,
         "RUST_LOG": "info",
     }
     

@@ -6,9 +6,9 @@ services:
     image: postgres:16-alpine
     container_name: guardrail-postgres
     environment:
-      POSTGRES_USER: guardrail
-      POSTGRES_PASSWORD: guardrail_dev
-      POSTGRES_DB: guardrail
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -60,7 +60,7 @@ services:
       dockerfile: identity-service/Dockerfile
     container_name: guardrail-identity
     environment:
-      DATABASE_URL: postgres://guardrail:guardrail_dev@postgres:5432/guardrail
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
       PORT: 3001
       RUST_LOG: debug
@@ -79,7 +79,7 @@ services:
       dockerfile: policy-engine/Dockerfile
     container_name: guardrail-policy
     environment:
-      DATABASE_URL: postgres://guardrail:guardrail_dev@postgres:5432/guardrail
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
       OPA_URL: http://opa:8181
       PORT: 3002

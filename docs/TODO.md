@@ -147,20 +147,38 @@ All core components implemented. Ready for testing and deployment.
 
 ---
 
+### Phase 4: Production Readiness ✅
+
+#### Security & Hardening ✅
+
+- [x] Externalize secrets to `.env`
+- [x] Secure containers (non-root user)
+- [x] Sanitize config (no default secrets)
+
+#### Stability & Rigidity ✅
+
+- [x] Fix panics (remove `.unwrap()`)
+- [x] Implement graceful shutdown
+- [x] Structured JSON logging
+
+#### Testing & Audit ✅
+
+- [x] Unit tests for core logic (Policy Engine, Movement Ledger)
+- [x] Integration test script (`integration_test.py`)
+- [x] Health check endpoints
+
 ## In Progress 🔄
-
-### Testing
-
-- [ ] Unit tests for backend services
-- [ ] Integration tests
-- [ ] E2E tests for frontend
-- [ ] Contract tests (Foundry, Anchor)
 
 ### Documentation
 
 - [ ] OpenAPI spec generation
 - [ ] SDK README and examples
 - [ ] Deployment guide
+
+### Testing
+
+- [ ] E2E tests for frontend
+- [ ] Contract tests (Foundry, Anchor)
 
 ---
 

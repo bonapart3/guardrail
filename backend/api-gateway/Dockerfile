@@ -25,6 +25,17 @@ RUN cargo build --release --bin api-gateway
 FROM debian:bookworm-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
+
+# Create a non-privileged user
+RUN useradd -m -u 1000 -U -s /bin/sh -d /app guardrail
+
 COPY --from=builder /app/target/release/api-gateway /app/
+
+# Change ownership of the application binary
+RUN chown -R guardrail:guardrail /app
+
+# Switch to the non-privileged user
+USER guardrail
+
 EXPOSE 3000
 CMD ["/app/api-gateway"]
