@@ -736,7 +736,7 @@ async fn export_events_impl(db: &PgPool, req: ExportRequest) -> Result<ExportRes
         events.first().unwrap().sequence_number,
         events.last().unwrap().sequence_number
     );
-    let signature = crypto::sha256(&signature_data);
+    let signature = crypto::sha256_hex(signature_data.as_bytes());
     
     Ok(ExportResponse {
         export_id,

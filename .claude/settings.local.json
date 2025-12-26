@@ -18,7 +18,11 @@
       "Bash(done)",
       "Bash(if [ -f \"frontend/Dockerfile\" ])",
       "Bash(docker compose:*)",
-      "Bash(docker ps:*)"
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(curl:*)",
+      "Bash(docker exec:*)",
+      "Bash(DATABASE_URL=\"postgres://guardrail:guardrail_dev@localhost:5432/guardrail\" cargo build:*)"
     ]
   }
 }

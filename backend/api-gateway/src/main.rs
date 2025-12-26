@@ -298,7 +298,7 @@ async fn create_api_key_impl(
     let key_prefix = &api_key[..10];
     
     // Hash the key for storage
-    let key_hash = crypto::sha256(&api_key);
+    let key_hash = crypto::sha256_hex(api_key.as_bytes());
     
     let expires_at = req.expires_in_days.map(|days| {
         chrono::Utc::now() + chrono::Duration::days(days)
@@ -373,7 +373,7 @@ async fn authenticate_jwt(state: &AppState, token: &str) -> Result<Authenticated
 }
 
 async fn authenticate_api_key(state: &AppState, api_key: &str) -> Result<AuthenticatedUser> {
-    let key_hash = crypto::sha256(api_key);
+    let key_hash = crypto::sha256_hex(api_key.as_bytes());
     
     let key_record = sqlx::query!(
         r#"

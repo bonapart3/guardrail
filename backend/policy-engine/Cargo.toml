@@ -18,3 +18,5 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tower-http = { version = "0.5", features = ["cors", "trace"] }
 reqwest = { version = "0.12", features = ["json"] }
+dotenvy = "0.15"
+regorus = "0.2"
